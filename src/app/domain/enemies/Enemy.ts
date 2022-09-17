@@ -45,8 +45,8 @@ export default abstract class Enemy extends Creature {
   public isOnScreen(playerX: number, playerY: number): boolean {
     const offScreenOffset = CONFIG.TILE_SIZE * 2
     return (
-      Math.abs(this.x - playerX) < (CONFIG.CANVAS_WIDTH  / 2) + offScreenOffset &&
-      Math.abs(this.y - playerY) < (CONFIG.CANVAS_HEIGHT / 2) + offScreenOffset
+      Math.abs(this.x - playerX) < CONFIG.CANVAS_WIDTH / 2 + offScreenOffset &&
+      Math.abs(this.y - playerY) < CONFIG.CANVAS_HEIGHT / 2 + offScreenOffset
     )
   }
 
@@ -54,15 +54,23 @@ export default abstract class Enemy extends Creature {
   protected abstract advanceAnimation(): void
 
   protected checkForCollisionWithPlayer(player: Player): void {
-    const nextEnemyState = { x: this.nextX, y: this.nextY, collisionBox: this.collisionBox }
+    const nextEnemyState = {
+      x: this.nextX,
+      y: this.nextY,
+      collisionBox: this.collisionBox,
+    }
     this.checkIfBlockedByCreature(player, nextEnemyState)
   }
 
   protected checkForCollisionWithOtherEnemies(player: Player): void {
-    const nextEnemyState = { x: this.nextX, y: this.nextY, collisionBox: this.collisionBox }
+    const nextEnemyState = {
+      x: this.nextX,
+      y: this.nextY,
+      collisionBox: this.collisionBox,
+    }
     const enemiesInScreenRangeFromThis = getEnemiesOnScreen(this.x, this.y)
 
-    enemiesInScreenRangeFromThis.forEach(e => {
+    enemiesInScreenRangeFromThis.forEach((e) => {
       if (this !== e) {
         this.checkIfBlockedByCreature(e, nextEnemyState)
       }
@@ -70,8 +78,8 @@ export default abstract class Enemy extends Creature {
   }
 
   protected checkIfStuck(): boolean {
-    const xIsStatic = this.prevX.every(x => x === this.prevX[0])
-    const yIsStatic = this.prevY.every(y => y === this.prevY[0])
+    const xIsStatic = this.prevX.every((x) => x === this.prevX[0])
+    const yIsStatic = this.prevY.every((y) => y === this.prevY[0])
     if (xIsStatic && yIsStatic) {
       return true
     } else {
@@ -81,23 +89,23 @@ export default abstract class Enemy extends Creature {
 
   // TODO: The color strings can be moved to a single hash map in order to optimize & localize the color searches
   protected getHealthColor(): string {
-    if (this.health <= this.maxHealth * 0.10) {
+    if (this.health <= this.maxHealth * 0.1) {
       return '#FF5700'
-    } else if (this.health <= this.maxHealth * 0.20) {
+    } else if (this.health <= this.maxHealth * 0.2) {
       return '#FF7B00'
-    } else if (this.health <= this.maxHealth * 0.30) {
+    } else if (this.health <= this.maxHealth * 0.3) {
       return '#FF9E00'
-    } else if (this.health <= this.maxHealth * 0.40) {
+    } else if (this.health <= this.maxHealth * 0.4) {
       return '#FFC100'
-    } else if (this.health <= this.maxHealth * 0.50) {
+    } else if (this.health <= this.maxHealth * 0.5) {
       return '#FFE400'
-    } else if (this.health <= this.maxHealth * 0.60) {
+    } else if (this.health <= this.maxHealth * 0.6) {
       return '#FFF600'
-    } else if (this.health <= this.maxHealth * 0.70) {
+    } else if (this.health <= this.maxHealth * 0.7) {
       return '#E5FF00'
-    } else if (this.health <= this.maxHealth * 0.80) {
+    } else if (this.health <= this.maxHealth * 0.8) {
       return '#D4FF00'
-    } else if (this.health <= this.maxHealth * 0.90) {
+    } else if (this.health <= this.maxHealth * 0.9) {
       return '#B0FF00'
     } else if (this.health < this.maxHealth) {
       return '#8DFF00'

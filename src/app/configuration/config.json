@@ -10,7 +10,11 @@
     "PATHFINDING_NODES": false,
     "SHORTEST_PATH_TO_PLAYER": false,
     "PLAYER_COLLISION_BOX": true,
-    "ENEMY_COLLISION_BOX": false
+    "PLAYER_VISION_RAY_SHOTGUN": false,
+    "ENEMY_COLLISION_BOX": true
+  },
+  "FEATURES": {
+    "SCATTER_PROJECTILES": true
   },
   "THROW_DEVELOPMENT_ERRORS": true
 }
