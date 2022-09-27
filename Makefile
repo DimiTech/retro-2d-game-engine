@@ -14,3 +14,6 @@ clean-build:
 
 clean-modules:
 	rm -rf node_modules/
+
+serve:
+	python3 -m http.server
