@@ -9,8 +9,6 @@ import { getEnemiesOnScreen } from '../map/Map'
 
 export default abstract class Enemy extends Creature {
   public alive: boolean = true
-  public maxHealth: number = 100
-  public health: number
 
   protected stuck: boolean
 
@@ -85,39 +83,5 @@ export default abstract class Enemy extends Creature {
     } else {
       return false
     }
-  }
-
-  // TODO: The color strings can be moved to a single hash map in order to optimize & localize the color searches
-  protected getHealthColor(): string {
-    if (this.health <= this.maxHealth * 0.1) {
-      return '#FF5700'
-    } else if (this.health <= this.maxHealth * 0.2) {
-      return '#FF7B00'
-    } else if (this.health <= this.maxHealth * 0.3) {
-      return '#FF9E00'
-    } else if (this.health <= this.maxHealth * 0.4) {
-      return '#FFC100'
-    } else if (this.health <= this.maxHealth * 0.5) {
-      return '#FFE400'
-    } else if (this.health <= this.maxHealth * 0.6) {
-      return '#FFF600'
-    } else if (this.health <= this.maxHealth * 0.7) {
-      return '#E5FF00'
-    } else if (this.health <= this.maxHealth * 0.8) {
-      return '#D4FF00'
-    } else if (this.health <= this.maxHealth * 0.9) {
-      return '#B0FF00'
-    } else if (this.health < this.maxHealth) {
-      return '#8DFF00'
-    } else if (this.health === this.maxHealth) {
-      return '#6AFF00'
-    }
-  }
-
-  private initializeHealth(healthPercentage: number): void {
-    if (healthPercentage < 0.0 || healthPercentage > 1.0) {
-      healthPercentage = 1.0
-    }
-    this.health = this.maxHealth * healthPercentage
   }
 }
