@@ -24,9 +24,10 @@ export default class Player extends Creature {
 
   constructor(public x: number, public y: number) {
     super()
+    this.initializeHealth()
 
     this.maxSpeed = 2
-    this.maxSpeedDiagonal = Math.round(Math.sin(45) * this.maxSpeed)
+    this.maxSpeedDiagonal = Math.round(Math.sin(45) * this.maxSpeed) // TODO: Extract function
 
     this.collisionBox = new CollisionBox(12, 12)
 
@@ -111,6 +112,13 @@ export default class Player extends Creature {
     this.shooting = isShooting
   }
 
+  public takeDamage(damageAmount: number): void {
+    this.health = this.health - damageAmount
+    if (this.health <= 0) {
+      // TODO: Implement lose condition
+    }
+  }
+
   private move(): void {
     if (this.moving.left && !this.blocked.left) {
       if (this.moving.up || this.moving.down) {
@@ -172,7 +180,9 @@ export default class Player extends Creature {
   }
 
   private drawCollisionBox() {
-    context.lineWidth = 1
+    context.strokeStyle = this.getHealthColor()
+
+    context.lineWidth = 0.5
     context.beginPath()
     // Since this is just for debugging purposes, there is no need to
     // cache the vertex calculations.
