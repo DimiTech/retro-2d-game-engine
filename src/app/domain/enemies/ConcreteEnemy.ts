@@ -18,6 +18,9 @@ import Sprites from '@app/graphics/Sprites'
 export default class ConcreteEnemy extends Enemy {
   protected sprite: CreatureSprite = Sprites.Zerg
   protected target: Point
+
+  protected attackSpeed = 60
+
   constructor(
     x: number,
     y: number,
@@ -46,6 +49,13 @@ export default class ConcreteEnemy extends Enemy {
       { x: player.x, y: player.y },
       { x: this.x,   y: this.y   }
     )
+    if (this.checkIfShouldAttack(player)) {
+      this.attacking = true
+      this.attack(player)
+    } else {
+      this.attacking = false
+      this.resetAttackCooldown()
+    }
     this.thereAreObstaclesBetweenPlayerAndThisEnemy =
       Raycaster.determineIfThereAreObstaclesBetweenTwoPathNodes(this, player)
     this.findPathToPlayer(player)
