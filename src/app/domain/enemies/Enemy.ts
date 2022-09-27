@@ -1,10 +1,12 @@
 import * as CONFIG from '@app/configuration/config.json'
 
-import CollisionBox from '@app/infrastructure/CollisionBox'
 import Creature from '@app/domain/Creature'
 import Player from '@app/domain/player/Player'
+import CollisionBox from '@app/infrastructure/CollisionBox'
 import { PathNode } from '@app/infrastructure/Pathfinding'
 import CreatureSprite from '@app/graphics/sprites/CreatureSprite'
+import SoundFX from '@app/audio/SoundFX'
+
 import { getEnemiesOnScreen } from '../map/Map'
 
 export default abstract class Enemy extends Creature {
@@ -21,6 +23,10 @@ export default abstract class Enemy extends Creature {
 
   protected sprite: CreatureSprite
 
+  protected attacking = false
+  protected readonly attackSpeed: number // Frames
+  protected attackCooldown: number
+
   constructor(
     public x: number,
     public y: number,
@@ -35,6 +41,8 @@ export default abstract class Enemy extends Creature {
     this.maxSpeedDiagonal = Math.round(Math.sin(45) * this.maxSpeed)
 
     this.collisionBox = collisionBox
+
+    this.attackCooldown = this.attackSpeed // TODO: Extract to initializeAttackParameters() or somehting...
   }
 
   public abstract draw(player: Player): void
@@ -75,6 +83,15 @@ export default abstract class Enemy extends Creature {
     })
   }
 
+  protected checkIfShouldAttack(p: Player) {
+    const diagonalOfCollisionBoxHalves = (p.collisionBox.halfWidth + this.collisionBox.halfWidth) * Math.sqrt(2)
+    return this.distanceFromPlayer < diagonalOfCollisionBoxHalves
+  }
+  
+  protected resetAttackCooldown() {
+    this.attackCooldown = this.attackSpeed
+  }
+
   protected checkIfStuck(): boolean {
     const xIsStatic = this.prevX.every((x) => x === this.prevX[0])
     const yIsStatic = this.prevY.every((y) => y === this.prevY[0])
@@ -83,5 +100,21 @@ export default abstract class Enemy extends Creature {
     } else {
       return false
     }
+  }
+
+  protected attack(p: Player): void {
+    if (this.attacking && this.attackCooldown <= 0) {
+      this.resetAttackCooldown()
+
+      SoundFX.playSMG() // TODO: Change the SFX
+      p.takeDamage(this.getDamage())
+    } else {
+      --this.attackCooldown
+    }
+  }
+
+  // TODO: Implement damage range
+  protected getDamage() {
+    return 10
   }
 }
