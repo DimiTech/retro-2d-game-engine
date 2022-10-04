@@ -7,7 +7,7 @@ import GAME_STATES from './GameStates'
 
 export default class GameStateMainMenu implements IGameState {
   private animationCounter: number = 0
-  private animationInterval: number = 100
+  private animationPosition: number = 100
   private instructionsVisible: boolean = true
 
   public enter(): void {
@@ -18,8 +18,8 @@ export default class GameStateMainMenu implements IGameState {
   }
 
   public update(): void {
-    this.animationCounter = (this.animationCounter + 1) % this.animationInterval
-    if (this.animationCounter >= this.animationInterval / 2) {
+    this.animationCounter = (this.animationCounter + 1) % this.animationPosition
+    if (this.animationCounter >= this.animationPosition / 2) {
       this.instructionsVisible = false
     } else {
       this.instructionsVisible = true

@@ -2,6 +2,7 @@ import * as CONFIG from '@app/configuration/config.json'
 
 import CollisionBox, { collisionBoxesIntersect, ICollidable } from '@app/infrastructure/CollisionBox'
 
+import CreatureState from '@app/domain/CreatureState'
 import { gameObjects } from '@app/domain/map/Map'
 import { Directions } from '@app/infrastructure/Directions'
 
@@ -20,10 +21,11 @@ export default abstract class Creature {
   public maxSpeed: number
   public maxSpeedDiagonal: number
 
-  public animationInterval: number = 0
+  public state: CreatureState = CreatureState.Idling
+
+  public animationPosition: number = 0
 
   public direction: Directions
-  public isMoving: boolean = false
   public moving = {
     left  : false,
     right : false,

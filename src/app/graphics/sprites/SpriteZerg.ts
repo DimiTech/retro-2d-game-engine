@@ -1,5 +1,6 @@
 import Canvas, { context } from '@app/infrastructure/Canvas'
 import Point from '@app/infrastructure/geometry/Point'
+import CreatureState from '@app/domain/CreatureState'
 import Enemy from '@app/domain/enemies/Enemy'
 
 import CreatureSprite from './CreatureSprite'
@@ -34,8 +35,8 @@ export default class SpriteZerg extends CreatureSprite {
     const { x, y, collisionBox: cBox } = enemy
     const { x: px, y: py } = playerCoordinates
 
-    if (enemy.isMoving === false) {
-      enemy.animationInterval = 0
+    if (enemy.state !== CreatureState.Moving) {
+      enemy.animationPosition = 0
     }
 
     if (spriteLocation.flip) {
@@ -50,7 +51,7 @@ export default class SpriteZerg extends CreatureSprite {
     context.drawImage(
       this.spriteSheet,
       SPRITE_OFFSETS.INITIAL.x + SPRITE_OFFSETS.STEP.x * spriteLocation.col,
-      SPRITE_OFFSETS.INITIAL.y + SPRITE_OFFSETS.STEP.y * Math.floor(enemy.animationInterval / 2),
+      SPRITE_OFFSETS.INITIAL.y + SPRITE_OFFSETS.STEP.y * Math.floor(enemy.animationPosition / 2),
       SPRITE_SIZE,
       SPRITE_SIZE,
       spriteLocation.flip ? 0 - SPRITE_SIZE / 2 : Canvas.center.x + (x - px - cBox.halfWidth),

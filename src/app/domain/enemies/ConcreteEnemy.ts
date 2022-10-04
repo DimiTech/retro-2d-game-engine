@@ -10,6 +10,7 @@ import CollisionBox from '@app/infrastructure/CollisionBox'
 import Raycaster from '@app/infrastructure/Raycaster'
 import { generatePathNodes, findShortestPath, drawPathNodes, drawNode } from '@app/infrastructure/Pathfinding'
 
+import CreatureState from '@app/domain/CreatureState'
 import Player from '@app/domain/player/Player'
 import Enemy from '@app/domain/enemies/Enemy'
 import CreatureSprite from '@app/graphics/sprites/CreatureSprite'
@@ -32,6 +33,13 @@ export default class ConcreteEnemy extends Enemy {
   }
 
   public update(player: Player, enemies: Enemy[]): void {
+    if (this.state === CreatureState.Dying) {
+      return
+    }
+    if (this.state === CreatureState.Decaying) {
+      return
+    }
+
     if (!this.target) {
       this.target = player
     }
@@ -39,32 +47,53 @@ export default class ConcreteEnemy extends Enemy {
     this.calculateNextCoordinates()
     this.updatePreviousCoordinates()
 
-    this.stuck    = this.checkIfStuck()
-    this.isMoving = this.checkIfMoving()
+    this.stuck = this.checkIfStuck() // TODO: Extract to state
+
+    if (this.checkIfMoving() === false) {
+      this.state = CreatureState.Idling
+    }
 
     this.adjustCollisionWithGameObjects()
     this.checkForCollisionWithPlayer(player)
     this.checkForCollisionWithOtherEnemies(player)
-    this.distanceFromPlayer = pointToPointDistance(
+    this.distanceFromTarget = pointToPointDistance(
       { x: player.x, y: player.y },
-      { x: this.x,   y: this.y   }
+      { x: this.x,   y: this.y   },
     )
-    if (this.checkIfShouldAttack(player)) {
-      this.attacking = true
-      this.attack(player)
+
+    if (this.targetInRange(player)) {
+      this.state = CreatureState.Attacking
     } else {
-      this.attacking = false
       this.resetAttackCooldown()
+      this.state === CreatureState.Idling
     }
+
+    if (this.state === CreatureState.Attacking) {
+      this.attack(player)
+    }
+
     this.thereAreObstaclesBetweenPlayerAndThisEnemy =
       Raycaster.determineIfThereAreObstaclesBetweenTwoPathNodes(this, player)
-    this.findPathToPlayer(player)
 
-    this.move()
-    this.updateDirection()
+    if ( // TODO: Clean this if statement up, if possible?
+      this.state === CreatureState.Idling ||
+      this.state === CreatureState.Moving
+    ) {
+      this.findPathToPlayer(player, this.thereAreObstaclesBetweenPlayerAndThisEnemy)
+
+      if (this.thereAreObstaclesBetweenPlayerAndThisEnemy === false || this.shortestPath.length > 0) {
+        this.state = CreatureState.Moving
+      }
+    }
+
+    if (this.state === CreatureState.Moving) {
+      this.move()
+    }
+
+    this.updateDirection() // TODO: This is based on movement, which is incorrect - fix it
     this.updateTileDeltas()
 
-    if (Game.stateManager.getState() !== GAME_STATES.PAUSED) {
+    if (Game.stateManager.getState() === GAME_STATES.PLAYING) {
       this.advanceAnimation()
     }
   }
@@ -72,6 +101,9 @@ export default class ConcreteEnemy extends Enemy {
   public draw(player: Player): void {
     if (CONFIG.DEBUG.ENEMY_COLLISION_BOX) {
       this.drawCollisionBox(player)
+    }
+    if (CONFIG.DEBUG.ENEMY_STATE) {
+      this.drawStateDebug(player)
     }
     if (CONFIG.DEBUG.RAY_TO_PLAYER) {
       this.drawRayToPlayer(player)
@@ -98,15 +130,15 @@ export default class ConcreteEnemy extends Enemy {
 
   public die() {
     SoundFX.playEnemyDeath()
-    this.alive = false
+    this.state = CreatureState.Decaying
   }
 
   protected advanceAnimation(): void {
-    this.animationInterval = (this.animationInterval + 0.5) % this.sprite.animationPeriods.walking
+    this.animationPosition = (this.animationPosition + 0.5) % this.sprite.animationPeriods.walking
   }
 
-  private findPathToPlayer(player: Player): void {
-    if (this.thereAreObstaclesBetweenPlayerAndThisEnemy) { // TODO: || this.isStuck()
+  private findPathToPlayer(player: Player, thereAreObstaclesBetweenPlayerAndThisEnemy: boolean) {
+    if (thereAreObstaclesBetweenPlayerAndThisEnemy) { // TODO: || this.isStuck()
       if (this.pathfindingInterval === 0) {
         this.pathfindingNodes = generatePathNodes(
           Math.round(Math.abs(player.row + this.row) / 2),
@@ -150,7 +182,7 @@ export default class ConcreteEnemy extends Enemy {
   }
 
   private moveTowardsPlayer(player: Point): void {
-    if (this.distanceFromPlayer > this.collisionBox.width) {
+    if (this.distanceFromTarget > this.collisionBox.width) {
       this.moveTowards(player.x, player.y)
     }
     else {
@@ -234,6 +266,17 @@ export default class ConcreteEnemy extends Enemy {
       context.lineTo(-0.5 + Canvas.center.x + (this.x - player.x) + this.collisionBox.halfWidth, -0.5 + Canvas.center.y + (this.y - player.y) + this.collisionBox.halfHeight)
       context.lineTo( 0.5 + Canvas.center.x + (this.x - player.x) - this.collisionBox.halfWidth, -0.5 + Canvas.center.y + (this.y - player.y) + this.collisionBox.halfHeight)
       context.lineTo( 0.5 + Canvas.center.x + (this.x - player.x) - this.collisionBox.halfWidth,  0.5 + Canvas.center.y + (this.y - player.y) - this.collisionBox.halfHeight)
+    context.stroke()
+  }
+
+  private drawStateDebug(player: Player) {
+    context.beginPath()
+      context.font = '8px Monospace'
+      context.fillText(
+        this.state.toString(),
+        Canvas.center.x + (this.x - player.x) - this.collisionBox.halfWidth,
+        Canvas.center.y + (this.y - player.y) - this.collisionBox.halfHeight
+      )
     context.stroke()
   }
 
