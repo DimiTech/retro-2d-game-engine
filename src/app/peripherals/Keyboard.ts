@@ -1,5 +1,4 @@
 import Game from '@app/infrastructure/game/Game'
-import FrameRate from '@app/infrastructure/FrameRate'
 import Player from '@app/domain/player/Player'
 import { KEYBOARD_KEYS } from './constants/KeyCodes'
 
