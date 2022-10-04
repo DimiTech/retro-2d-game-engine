@@ -8,13 +8,12 @@ import CreatureSprite from '@app/graphics/sprites/CreatureSprite'
 import SoundFX from '@app/audio/SoundFX'
 
 import { getEnemiesOnScreen } from '../map/Map'
+import CreatureState from '../CreatureState'
 
 export default abstract class Enemy extends Creature {
-  public alive: boolean = true
+  protected stuck: boolean // TODO: Use stuck for something?
 
-  protected stuck: boolean
-
-  protected distanceFromPlayer: number
+  protected distanceFromTarget: number
   protected thereAreObstaclesBetweenPlayerAndThisEnemy: boolean
   protected pathfindingInterval: number = 0
   protected pathfindingPeriod: number = 30
@@ -23,7 +22,6 @@ export default abstract class Enemy extends Creature {
 
   protected sprite: CreatureSprite
 
-  protected attacking = false
   protected readonly attackSpeed: number // Frames
   protected attackCooldown: number
 
@@ -83,9 +81,9 @@ export default abstract class Enemy extends Creature {
     })
   }
 
-  protected checkIfShouldAttack(p: Player) {
-    const diagonalOfCollisionBoxHalves = (p.collisionBox.halfWidth + this.collisionBox.halfWidth) * Math.sqrt(2)
-    return this.distanceFromPlayer < diagonalOfCollisionBoxHalves
+  protected targetInRange(target: Creature) {
+    const sumOfCollisionBoxHalfDiagonals = (target.collisionBox.halfWidth + this.collisionBox.halfWidth) * Math.sqrt(2)
+    return this.distanceFromTarget < sumOfCollisionBoxHalfDiagonals
   }
   
   protected resetAttackCooldown() {
@@ -103,14 +101,18 @@ export default abstract class Enemy extends Creature {
   }
 
   protected attack(p: Player): void {
-    if (this.attacking && this.attackCooldown <= 0) {
+    if (this.state === CreatureState.Attacking && this.attackCooldown <= 0) {
       this.resetAttackCooldown()
 
       SoundFX.playSMG() // TODO: Change the SFX
-      p.takeDamage(this.getDamage())
+      this.dealDamage(p)
     } else {
       --this.attackCooldown
     }
+  }
+
+  protected dealDamage(p: Player) {
+    p.takeDamage(this.getDamage())
   }
 
   // TODO: Implement damage range

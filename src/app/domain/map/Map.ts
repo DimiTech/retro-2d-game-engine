@@ -3,6 +3,7 @@ import * as CONFIG from '@app/configuration/config.json'
 import Grid from '@app/domain/Grid'
 
 import Player from '@app/domain/player/Player'
+import CreatureState from '@app/domain/CreatureState'
 import ConcreteEnemy from '@app/domain/enemies/ConcreteEnemy'
 import Enemy from '@app/domain/enemies/Enemy'
 import Canvas from '@app/infrastructure/Canvas'
@@ -27,7 +28,7 @@ export default class Map {
   public update(): void {
     enemies.forEach((e, i) => {
       e.update(this.player, enemies)
-      if (e.alive === false) {
+      if (e.state === CreatureState.Decaying) {
         enemies.splice(i, 1) // Remove the enemy
       }
     })
