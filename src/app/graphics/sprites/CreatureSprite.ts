@@ -4,7 +4,7 @@ import Enemy from '@app/domain/enemies/Enemy'
 export default abstract class CreatureSprite {
   public spriteSheet: HTMLImageElement
 
-  public abstract animationLength: { [animation: string]: number }
+  public abstract numberOfSpritesInAnimation: { [animation: string]: number }
 
   protected abstract url: string
   public abstract draw(e: Enemy, playerCoordinates: Point): void
