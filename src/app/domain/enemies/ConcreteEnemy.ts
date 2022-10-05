@@ -148,9 +148,9 @@ export default class ConcreteEnemy extends Enemy {
 
   protected advanceAnimation(): void {
     if (this.state === CreatureState.Attacking) {
-      this.animationPosition = (this.animationPosition + 0.3) % this.sprite.animationLength.attacking
+      this.animationPosition = (this.animationPosition + 0.15) % this.sprite.numberOfSpritesInAnimation.attacking
     } else if (this.state === CreatureState.Moving) {
-     this.animationPosition = (this.animationPosition + 0.5) % this.sprite.animationLength.walking
+     this.animationPosition = (this.animationPosition + 0.25) % this.sprite.numberOfSpritesInAnimation.walking
     }
   }
 

@@ -22,7 +22,7 @@ export default abstract class Creature {
   public maxSpeedDiagonal: number
 
   public state: CreatureState = CreatureState.Idling
-  public previousState: CreatureState = CreatureState.Idling
+  public previousState: CreatureState = CreatureState.Idling // TODO: Use `previousState` for something? (Currently it's unused)
 
   public animationPosition: number = 0
 
