@@ -16,14 +16,6 @@ export default class Game {
 
   public static stateManager: GameStateManager = new GameStateManager()
 
-  public static togglePause(): void {
-    if (Game.stateManager.getState() === GAME_STATES.PAUSED) {
-      Game.stateManager.setState(GAME_STATES.PLAYING)
-    } else {
-      Game.stateManager.setState(GAME_STATES.PAUSED)
-    }
-  }
-
   constructor() {
     window.onfocus = () => {
       FrameRate.restart()

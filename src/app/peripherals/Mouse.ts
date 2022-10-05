@@ -1,15 +1,15 @@
 import Canvas from '@app/infrastructure/Canvas'
-import Player from '@app/domain/player/Player'
+
+type MouseEventHandler = (e: MouseEvent) => void
 
 export default class Mouse {
   public static x: number = window.innerWidth  / 2 + 100
   public static y: number = window.innerHeight / 2 + 50
-  public static init(player: Player) {
+  public static init(mouseDownListener: MouseEventHandler, mouseUpListener: MouseEventHandler) {
     this.hijackRightClick()
     this.trackMouseOnCanvas()
-    this.listenForLeftClicks(player)
+    this.listenForLeftClicks(mouseDownListener, mouseUpListener)
   }
-
   private static hijackRightClick(): void {
     window.addEventListener('contextmenu', e => {
       e.preventDefault()
@@ -24,13 +24,15 @@ export default class Mouse {
     }, false)
   }
 
-  private static listenForLeftClicks(player: Player): void {
+  private static listenForLeftClicks(mouseDownListener: MouseEventHandler, mouseUpListener: MouseEventHandler): void {
     const canvas: HTMLCanvasElement = Canvas.getCanvasDomElement()
-    canvas.addEventListener('mousedown', e => {
-      player.setShooting(true)
-    }, false)
-    canvas.addEventListener('mouseup', e => {
-      player.setShooting(false)
-    }, false)
+    canvas.addEventListener('mousedown', mouseDownListener, false)
+    canvas.addEventListener('mouseup', mouseUpListener, false)
+  }
+
+  public static removeMouseLeftClickListeners(mouseDownListener: MouseEventHandler, mouseUpListener: MouseEventHandler) {
+    const canvas: HTMLCanvasElement = Canvas.getCanvasDomElement()
+    canvas.removeEventListener('mousedown', mouseDownListener)
+    canvas.removeEventListener('mouseup', mouseUpListener)
   }
 }

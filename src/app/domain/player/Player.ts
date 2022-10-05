@@ -1,5 +1,7 @@
 import * as CONFIG from '@app/configuration/config.json'
 
+import { KEYBOARD_KEYS } from '@app/peripherals/constants/KeyCodes'
+
 import Canvas, { context } from '@app/infrastructure/Canvas'
 import Raycaster from '@app/infrastructure/Raycaster'
 import CollisionBox, {
@@ -83,6 +85,39 @@ export default class Player extends Creature {
     this.drawProjectiles()
   }
 
+  public keydownHandler = (e: KeyboardEvent) => {
+    switch (e.keyCode) {
+      case KEYBOARD_KEYS.w:
+        this.moving.up = true
+        break
+      case KEYBOARD_KEYS.a:
+        this.moving.left = true
+        break
+      case KEYBOARD_KEYS.s:
+        this.moving.down = true
+        break
+      case KEYBOARD_KEYS.d:
+        this.moving.right = true
+        break
+    }
+  }
+  public keyupHandler = (e: KeyboardEvent) => {
+    switch (e.keyCode) {
+      case KEYBOARD_KEYS.w:
+        this.moving.up = false
+        break
+      case KEYBOARD_KEYS.a:
+        this.moving.left = false
+        break
+      case KEYBOARD_KEYS.s:
+        this.moving.down = false
+        break
+      case KEYBOARD_KEYS.d:
+        this.moving.right = false
+        break
+      }
+  }
+
   public shoot(): void {
     if (this.shooting && this.shootingCooldown <= 0) {
       const dx = Canvas.mousePosition.x - Canvas.center.x
@@ -115,7 +150,7 @@ export default class Player extends Creature {
   public takeDamage(damageAmount: number): void {
     this.health = this.health - damageAmount
     if (this.health <= 0) {
-      // TODO: Implement lose condition
+      this.die()
     }
   }
 
@@ -237,7 +272,7 @@ export default class Player extends Creature {
     this.deltas.dxRight = CONFIG.TILE_SIZE - this.deltas.dxLeft
   }
 
-  private checkForCollisionWithEnemies(): void {
+  private checkForCollisionWithEnemies(): void { // TODO: Extract to Creature?
     const nextPlayerState = {
       x: this.nextX,
       y: this.nextY,
@@ -255,6 +290,7 @@ export default class Player extends Creature {
   }
 
   private die(): void {
+    // TODO: Re-use CreatureState
     this.alive = false
   }
 }

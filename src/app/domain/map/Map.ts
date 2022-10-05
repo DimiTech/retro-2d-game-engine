@@ -1,6 +1,5 @@
 import * as CONFIG from '@app/configuration/config.json'
 
-import Grid from '@app/domain/Grid'
 
 import Player from '@app/domain/player/Player'
 import CreatureState from '@app/domain/CreatureState'
@@ -21,8 +20,14 @@ export function getEnemiesOnScreen(playerX: number, playerY: number): Enemy[] {
 }
 
 export default class Map {
-  constructor(private grid: Grid, private player: Player) {
+  constructor(private player: Player) {
     this.loadMap(Map01)
+  }
+
+  public destroy() {
+    while (enemies.length) {
+      enemies.pop()
+    }
   }
 
   public update(): void {

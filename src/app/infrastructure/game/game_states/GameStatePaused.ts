@@ -1,15 +1,19 @@
 import * as CONFIG from '@app/configuration/config.json'
 
-import IGameState from './IGameState'
+import { KEYBOARD_KEYS } from '@app/peripherals/constants/KeyCodes'
+
 import { context } from '@app/infrastructure/Canvas'
+import Game from '@app/infrastructure/game/Game'
+import IGameState from './IGameState'
 import GAME_STATES from './GameStates'
 
 export default class GameStatePaused implements IGameState {
   public enter(): void {
-    return
+    window.addEventListener('keydown', this.pauseHandler)
   }
+
   public exit(): void {
-    return
+    window.removeEventListener('keydown', this.pauseHandler)
   }
 
   public update(): void {
@@ -19,6 +23,19 @@ export default class GameStatePaused implements IGameState {
   public render(): void {
     GAME_STATES.PLAYING.render()
     this.drawPauseMenu()
+  }
+
+  private pauseHandler = (e: KeyboardEvent) => {
+    switch (e.keyCode) {
+      case KEYBOARD_KEYS.ESC:
+        e.preventDefault()
+        GAME_STATES.PLAYING.destroyGame()
+        Game.stateManager.setState(GAME_STATES.MAIN_MENU)
+        break
+      case KEYBOARD_KEYS.p:
+        Game.stateManager.setState(GAME_STATES.PLAYING)
+        break
+    }
   }
 
   private drawPauseMenu(): void {
