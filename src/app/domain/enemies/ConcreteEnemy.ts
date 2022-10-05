@@ -20,7 +20,7 @@ export default class ConcreteEnemy extends Enemy {
   protected sprite: CreatureSprite = Sprites.Zerg
   protected target: Point
 
-  protected attackSpeed = 60
+  protected attackSpeed = 32
 
   constructor(
     x: number,
@@ -49,8 +49,12 @@ export default class ConcreteEnemy extends Enemy {
 
     this.stuck = this.checkIfStuck() // TODO: Extract to state
 
-    if (this.checkIfMoving() === false) {
-      this.state = CreatureState.Idling
+    if (
+      this.state !== CreatureState.Idling &&
+      this.state !== CreatureState.Attacking &&
+      this.checkIfMoving() === false
+    ) {
+      this.setState(CreatureState.Idling)
     }
 
     this.adjustCollisionWithGameObjects()
@@ -61,15 +65,18 @@ export default class ConcreteEnemy extends Enemy {
       { x: this.x,   y: this.y   },
     )
 
-    if (this.targetInRange(player)) {
-      this.state = CreatureState.Attacking
-    } else {
+    const targetIsInRange = this.targetInRange(player)
+    if (this.state !== CreatureState.Attacking && targetIsInRange) {
       this.resetAttackCooldown()
-      this.state === CreatureState.Idling
+      this.setState(CreatureState.Attacking)
     }
 
     if (this.state === CreatureState.Attacking) {
-      this.attack(player)
+      if (targetIsInRange) {
+        this.attack(player)
+      } else {
+        this.setState(CreatureState.Moving)
+      }
     }
 
     this.thereAreObstaclesBetweenPlayerAndThisEnemy =
@@ -81,8 +88,14 @@ export default class ConcreteEnemy extends Enemy {
     ) {
       this.findPathToPlayer(player, this.thereAreObstaclesBetweenPlayerAndThisEnemy)
 
-      if (this.thereAreObstaclesBetweenPlayerAndThisEnemy === false || this.shortestPath.length > 0) {
-        this.state = CreatureState.Moving
+      if (
+        this.state !== CreatureState.Moving &&
+        (
+          this.thereAreObstaclesBetweenPlayerAndThisEnemy === false ||
+          this.shortestPath.length > 0
+        )
+      ) {
+        this.setState(CreatureState.Moving)
       }
     }
 
@@ -130,11 +143,15 @@ export default class ConcreteEnemy extends Enemy {
 
   public die() {
     SoundFX.playEnemyDeath()
-    this.state = CreatureState.Decaying
+    this.setState(CreatureState.Decaying)
   }
 
   protected advanceAnimation(): void {
-    this.animationPosition = (this.animationPosition + 0.5) % this.sprite.animationPeriods.walking
+    if (this.state === CreatureState.Attacking) {
+      this.animationPosition = (this.animationPosition + 0.3) % this.sprite.animationLength.attacking
+    } else if (this.state === CreatureState.Moving) {
+     this.animationPosition = (this.animationPosition + 0.5) % this.sprite.animationLength.walking
+    }
   }
 
   private findPathToPlayer(player: Player, thereAreObstaclesBetweenPlayerAndThisEnemy: boolean) {

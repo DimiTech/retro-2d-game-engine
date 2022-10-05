@@ -22,6 +22,7 @@ export default abstract class Creature {
   public maxSpeedDiagonal: number
 
   public state: CreatureState = CreatureState.Idling
+  public previousState: CreatureState = CreatureState.Idling
 
   public animationPosition: number = 0
 
@@ -313,5 +314,15 @@ export default abstract class Creature {
     } else if (this.health === this.maxHealth) {
       return '#6AFF00'
     }
+  }
+
+  protected resetAnimation() {
+    this.animationPosition = 0
+  }
+
+  public setState(newState: CreatureState) {
+    this.previousState = this.state
+    this.state = newState
+    this.resetAnimation()
   }
 }
