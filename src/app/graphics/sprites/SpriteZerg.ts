@@ -8,36 +8,63 @@ import CreatureSprite from './CreatureSprite'
 export default class SpriteZerg extends CreatureSprite {
   public url: string = './graphics/spritesheets/zergling.png'
 
-  public animationPeriods = {
+  public animationLength = {
     walking: 8,
+    attacking: 10,
+  }
+
+  private spriteLocations: { [key: string]: { col: number, flip: boolean } } = {
+    N : { col: 0, flip: false },
+    NE: { col: 2, flip: false },
+    E : { col: 4, flip: false },
+    SE: { col: 6, flip: false },
+    S : { col: 8, flip: false },
+    SW: { col: 6, flip: true  },
+    W : { col: 4, flip: true  },
+    NW: { col: 2, flip: true  },
+  }
+  private spriteSize = 32
+  private spriteStep: Point
+
+  constructor() {
+    super()
+    this.spriteStep = { x: this.spriteSize + 11, y: this.spriteSize + 10 }
   }
 
   public draw(enemy: Enemy, playerCoordinates: Point) {
+    const spriteOffsets: Point = this.getSpriteOffsets(enemy.state, this.spriteStep)
 
-    const SPRITE_LOCATIONS: { [key: string]: { col: number, flip: boolean } } = {
-      N : { col: 0, flip: false },
-      NE: { col: 2, flip: false },
-      E : { col: 4, flip: false },
-      SE: { col: 6, flip: false },
-      S : { col: 8, flip: false },
-      SW: { col: 6, flip: true  },
-      W : { col: 4, flip: true  },
-      NW: { col: 2, flip: true  },
+    const spriteLocation = this.spriteLocations[enemy.direction]
+
+    this.drawSprite(enemy, playerCoordinates, spriteOffsets, spriteLocation)
+  }
+
+  private getSpriteOffsets(enemyState: CreatureState, SPRITE_STEP: Point) {
+    switch (enemyState) {
+      case CreatureState.Moving:
+      case CreatureState.Idling:
+        return {
+          x: 7,
+          y: 5
+        }
+      case CreatureState.Attacking:
+        const ATTACK_SPRITES_ROW = 7
+        return {
+          x: 7,
+          y: 5 + (ATTACK_SPRITES_ROW * SPRITE_STEP.y)
+        }
     }
+  }
 
-    const spriteLocation = SPRITE_LOCATIONS[enemy.direction]
+  private drawSprite(
+    enemy: Enemy,
+    playerCoordinates: Point,
+    spriteOffsets: Point,
+    spriteLocation: { col: number, flip: boolean },
+  ) {
 
-    const SPRITE_SIZE = 32
-    const SPRITE_OFFSETS = {
-      INITIAL: { x: 7, y: 5 },
-      STEP: { x: SPRITE_SIZE + 11, y: SPRITE_SIZE + 10 }
-    }
     const { x, y, collisionBox: cBox } = enemy
     const { x: px, y: py } = playerCoordinates
-
-    if (enemy.state !== CreatureState.Moving) {
-      enemy.animationPosition = 0
-    }
 
     if (spriteLocation.flip) {
       context.save()
@@ -50,15 +77,16 @@ export default class SpriteZerg extends CreatureSprite {
 
     context.drawImage(
       this.spriteSheet,
-      SPRITE_OFFSETS.INITIAL.x + SPRITE_OFFSETS.STEP.x * spriteLocation.col,
-      SPRITE_OFFSETS.INITIAL.y + SPRITE_OFFSETS.STEP.y * Math.floor(enemy.animationPosition / 2),
-      SPRITE_SIZE,
-      SPRITE_SIZE,
-      spriteLocation.flip ? 0 - SPRITE_SIZE / 2 : Canvas.center.x + (x - px - cBox.halfWidth),
-      spriteLocation.flip ? 0                   : Canvas.center.y + (y - py - cBox.halfHeight),
-      enemy.collisionBox.width + 2,
-      enemy.collisionBox.height + 2,
+      spriteOffsets.x + this.spriteStep.x * spriteLocation.col,
+      spriteOffsets.y + this.spriteStep.y * Math.floor(enemy.animationPosition / 2),
+      this.spriteSize,
+      this.spriteSize,
+      spriteLocation.flip ? 0 - this.spriteSize / 2 : Canvas.center.x + (x - px - cBox.halfWidth),  // Canvas Desination X
+      spriteLocation.flip ? 0                   : Canvas.center.y + (y - py - cBox.halfHeight), // Canvas Desination Y
+      enemy.collisionBox.width  + 2, // Draw width
+      enemy.collisionBox.height + 2, // Draw height
     )
+
     if (spriteLocation.flip) {
       context.restore()
     }
