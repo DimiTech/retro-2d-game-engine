@@ -11,7 +11,6 @@ import MapKeys, { isWall } from '@app/domain/map/MapKeys'
 import Wall from '@app/domain/objects/wall/Wall'
 import WallFactory from '@app/domain/objects/wall/WallFactory'
 import Portal from '@app/domain/objects/portal/Portal'
-import PortalFactory from '@app/domain/objects/portal/PortalFactory'
 
 import IMap from './IMap'
 import * as Map01 from '@app/resources/maps/Map-01.json'
@@ -92,21 +91,31 @@ export default class Map {
     this.loadEnemies(map)
   }
 
+  // Inefficient - provides clearer separation (loading happens once - so it's not a big deal)
   private loadGameObjects(map: IMap) {
+    this.loadWalls(map)
+    this.loadExitPortal(map)
+  }
+
+  private loadWalls(map: IMap) {
     for (let row = 0; row < map.gameObjects.length; ++row) {
       Map.walls[row] = []
       for (let col = 0; col < map.gameObjects[row].length; ++col) {
         const mapKey = map.gameObjects[row][col] 
-
-        // Walls
         Map.walls[row][col] = null
         if (isWall(mapKey)) {
           Map.walls[row][col] = WallFactory.createWall(row, col, mapKey)
         }
+      }
+    }
+  }
 
-        // Portal
-        else if (mapKey === MapKeys.ExitPortal) {
-          Map.exitPortal = PortalFactory.createExitPortal(row, col)
+  private loadExitPortal(map: IMap) {
+    for (let row = 0; row < map.gameObjects.length; ++row) {
+      for (let col = 0; col < map.gameObjects[row].length; ++col) {
+        const mapKey = map.gameObjects[row][col] 
+        if (mapKey === MapKeys.ExitPortal) {
+          Map.exitPortal = new Portal(row, col)
         }
       }
     }

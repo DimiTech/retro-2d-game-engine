@@ -1,23 +1,16 @@
 import * as CONFIG from '@app/configuration/config.json'
 
 import { context } from '@app/infrastructure/Canvas'
-import GameObject from '../GameObject'
+import PortalObject from './PortalObject'
 
-export default class Portal extends GameObject { // TODO: Don't extend Game Object ?
+export default class Portal extends PortalObject {
   public isOpen = false
 
-  private static openColor   = 'rgba(50, 120, 50, 0.2)'
-  private static closedColor = 'rgba(180, 50, 50, 0.2)'
+  protected static openColor   = 'rgba(50, 120, 50, 0.2)'
+  protected static closedColor = 'rgba(180, 50, 50, 0.2)'
 
   draw(): void {
-    if (this.isOpen) {
-      this.color = Portal.openColor
-    }
-    else {
-      this.color = Portal.closedColor
-    }
-    context.fillStyle = this.color
-    context.fillStyle = this.color
+    context.fillStyle = this.getColor()
     context.beginPath()
       context.rect(
         this.x,
@@ -32,7 +25,12 @@ export default class Portal extends GameObject { // TODO: Don't extend Game Obje
     this.isOpen = true
   }
 
-  public takeDamage(damageAmount: number): void { // TODO: Remove this
-    return
+  private getColor(): string {
+    if (this.isOpen) {
+      return Portal.openColor
+    }
+    else {
+      return Portal.closedColor
+    }
   }
 }
