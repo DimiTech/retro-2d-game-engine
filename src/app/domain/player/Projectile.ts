@@ -3,7 +3,7 @@ import * as CONFIG from '@app/configuration/config.json'
 import Canvas, { context } from '@app/infrastructure/Canvas'
 
 import Enemy from '@app/domain/enemies/Enemy'
-import { walls, enemies } from '@app/domain/map/Map'
+import Map from '@app/domain/map/Map'
 
 interface IntermediatePoint {
   x: number
@@ -87,7 +87,7 @@ export default class Projectile {
   //       Instead of finding the nearest enemies every time, maybe just take
   //       the enemies that are visible on the screen (+ some offset)?
   private getNearbyEnemies(): Enemy[] {
-    return [ ...enemies ].filter(e => (
+    return [ ...Map.enemies ].filter(e => (
       Math.abs(e.x - this.x) <= CONFIG.TILE_SIZE &&
       Math.abs(e.y - this.y) <= CONFIG.TILE_SIZE
     ))
@@ -142,12 +142,12 @@ export default class Projectile {
       point = this
     }
 
-    const wall = walls[point.row][point.col]
+    const wall = Map.walls[point.row][point.col]
     if (wall) {
         wall.takeDamage(this.getDamage())
         this.alive = false
         if (wall.destructable) {
-          walls[point.row][point.col] = null
+          Map.walls[point.row][point.col] = null
         }
     }
   }

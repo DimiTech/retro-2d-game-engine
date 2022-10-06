@@ -7,7 +7,7 @@ import { PathNode } from '@app/infrastructure/Pathfinding'
 import CreatureSprite from '@app/graphics/sprites/CreatureSprite'
 import SoundFX from '@app/audio/SoundFX'
 
-import { getEnemiesOnScreen } from '../map/Map'
+import Map from '../map/Map'
 
 export default abstract class Enemy extends Creature {
   protected stuck: boolean // TODO: Use stuck for something?
@@ -71,7 +71,7 @@ export default abstract class Enemy extends Creature {
       y: this.nextY,
       collisionBox: this.collisionBox,
     }
-    const enemiesInScreenRangeFromThis = getEnemiesOnScreen(this.x, this.y)
+    const enemiesInScreenRangeFromThis = Map.getEnemiesOnScreen(this.x, this.y)
 
     enemiesInScreenRangeFromThis.forEach((e) => {
       if (this !== e) {

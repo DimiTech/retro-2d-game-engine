@@ -2,7 +2,7 @@ import * as CONFIG from '@app/configuration/config.json'
 
 import Point, { angleBetweenPoints } from '@app/infrastructure/geometry/Point'
 import Wall from '@app/domain/objects/wall/Wall'
-import { walls } from '@app/domain/map/Map'
+import Map from '@app/domain/map/Map'
 
 import Canvas, { context } from '@app/infrastructure/Canvas'
 import RaycastablePoint from './geometry/RaycastablePoint'
@@ -884,12 +884,12 @@ export default class Raycaster {
     const yTile_aboveByOnePixel = p.row + Math.floor((p.deltas.dyTop + yIntercept - 1) / CONFIG.TILE_SIZE)
 
     let wallHit = null
-    if (walls[yTile]) {
-      if (walls[yTile][xTile]) {
-        wallHit = walls[yTile][xTile]
+    if (Map.walls[yTile]) {
+      if (Map.walls[yTile][xTile]) {
+        wallHit = Map.walls[yTile][xTile]
       }
-      else if (walls[yTile_aboveByOnePixel][xTile]) {
-        wallHit = walls[yTile_aboveByOnePixel][xTile]
+      else if (Map.walls[yTile_aboveByOnePixel][xTile]) {
+        wallHit = Map.walls[yTile_aboveByOnePixel][xTile]
       }
     }
 
@@ -904,8 +904,8 @@ export default class Raycaster {
     const yTile = p.row + i + 1
 
     let wallHit = null
-    if (walls[yTile] && walls[yTile][xTile]) {
-      wallHit = walls[yTile][xTile]
+    if (Map.walls[yTile] && Map.walls[yTile][xTile]) {
+      wallHit = Map.walls[yTile][xTile]
     }
 
     if (CONFIG.DEBUG.RAYCASTER) {
@@ -920,8 +920,8 @@ export default class Raycaster {
     const yTile = p.row + Math.floor((p.deltas.dyTop - yIntercept) / CONFIG.TILE_SIZE)
 
     let wallHit = null
-    if (walls[yTile] && walls[yTile][xTile]) {
-      wallHit = walls[yTile][xTile]
+    if (Map.walls[yTile] && Map.walls[yTile][xTile]) {
+      wallHit = Map.walls[yTile][xTile]
     }
 
     if (CONFIG.DEBUG.RAYCASTER) {
@@ -936,12 +936,12 @@ export default class Raycaster {
     const yTile = p.row - i - 1
 
     let wallHit = null
-    if (walls[yTile]) {
-      if (walls[yTile][xTile]) {
-        wallHit = walls[yTile][xTile]
+    if (Map.walls[yTile]) {
+      if (Map.walls[yTile][xTile]) {
+        wallHit = Map.walls[yTile][xTile]
       }
-      else if (walls[yTile][xTile_leftByOnePixel]) {
-        wallHit = walls[yTile][xTile_leftByOnePixel]
+      else if (Map.walls[yTile][xTile_leftByOnePixel]) {
+        wallHit = Map.walls[yTile][xTile_leftByOnePixel]
       }
     }
 
@@ -957,8 +957,8 @@ export default class Raycaster {
     const yTile = p.row + Math.floor((p.deltas.dyTop - yIntercept) / CONFIG.TILE_SIZE)
 
     let wallHit = null
-    if (walls[yTile] && walls[yTile][xTile]) {
-      wallHit = walls[yTile][xTile]
+    if (Map.walls[yTile] && Map.walls[yTile][xTile]) {
+      wallHit = Map.walls[yTile][xTile]
     }
 
     if (CONFIG.DEBUG.RAYCASTER) {
@@ -972,8 +972,8 @@ export default class Raycaster {
     const yTile = p.row - i - 1
 
     let wallHit = null
-    if (walls[yTile] && walls[yTile][xTile]) {
-      wallHit = walls[yTile][xTile]
+    if (Map.walls[yTile] && Map.walls[yTile][xTile]) {
+      wallHit = Map.walls[yTile][xTile]
     }
 
     if (CONFIG.DEBUG.RAYCASTER) {
@@ -989,12 +989,12 @@ export default class Raycaster {
     const yTile_aboveByOnePixel = p.row + Math.floor((p.deltas.dyTop + yIntercept - 1) / CONFIG.TILE_SIZE)
 
     let wallHit = null
-    if (walls[yTile]) {
-      if (walls[yTile][xTile]) {
-        wallHit = walls[yTile][xTile]
+    if (Map.walls[yTile]) {
+      if (Map.walls[yTile][xTile]) {
+        wallHit = Map.walls[yTile][xTile]
       }
-      else if (walls[yTile_aboveByOnePixel][xTile]) {
-        wallHit = walls[yTile_aboveByOnePixel][xTile]
+      else if (Map.walls[yTile_aboveByOnePixel][xTile]) {
+        wallHit = Map.walls[yTile_aboveByOnePixel][xTile]
       }
     }
 
@@ -1009,8 +1009,8 @@ export default class Raycaster {
     const yTile = p.row + i + 1
 
     let wallHit = null
-    if (walls[yTile] && walls[yTile][xTile]) {
-      wallHit = walls[yTile][xTile]
+    if (Map.walls[yTile] && Map.walls[yTile][xTile]) {
+      wallHit = Map.walls[yTile][xTile]
     }
 
     if (CONFIG.DEBUG.RAYCASTER) {

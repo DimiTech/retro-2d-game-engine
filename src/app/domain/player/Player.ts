@@ -10,7 +10,7 @@ import CollisionBox, {
 import { angleBetweenPoints } from '@app/infrastructure/geometry/Point'
 
 import Creature from '@app/domain/Creature'
-import { getEnemiesOnScreen } from '@app/domain/map/Map'
+import Map from '@app/domain/map/Map'
 import Crosshair from './Crosshair'
 import Projectile from './Projectile'
 
@@ -278,7 +278,7 @@ export default class Player extends Creature {
       y: this.nextY,
       collisionBox: this.collisionBox,
     }
-    const enemiesOnScreen = getEnemiesOnScreen(this.x, this.y)
+    const enemiesOnScreen = Map.getEnemiesOnScreen(this.x, this.y)
 
     if (
       enemiesOnScreen.some((e) => collisionBoxesIntersect(e, nextPlayerState))

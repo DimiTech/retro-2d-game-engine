@@ -8,7 +8,7 @@ import { KEYBOARD_KEYS } from '@app/peripherals/constants/KeyCodes'
 import Mouse from '@app/peripherals/Mouse'
 import Gamepads from '@app/peripherals/Gamepads'
 
-import Map, { enemiesRemaining } from '@app/domain/map/Map'
+import Map from '@app/domain/map/Map'
 import Player from '@app/domain/player/Player'
 import GAME_STATES from './GameStates'
 
@@ -71,7 +71,7 @@ export default class GameStatePlaying implements IGameState {
 
   private checkForVictoryCondition() {
     if (
-      enemiesRemaining() === 0 &&
+      Map.enemiesRemaining() === 0 &&
       this.checkIfPlayerIsInsideExitPortal()
     ) {
       Game.stateManager.setState(GAME_STATES.VICTORY)  
