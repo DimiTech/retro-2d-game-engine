@@ -1,8 +1,8 @@
 import * as CONFIG from '@app/configuration/config.json'
 
-import Point, { angleBetweenPoints, updatePointRowAndColValues, updatePointDeltas } from '@app/infrastructure/geometry/Point'
-import GameObject from '@app/domain/objects/GameObject'
-import { gameObjects } from '@app/domain/map/Map'
+import Point, { angleBetweenPoints } from '@app/infrastructure/geometry/Point'
+import Wall from '@app/domain/objects/wall/Wall'
+import { walls } from '@app/domain/map/Map'
 
 import Canvas, { context } from '@app/infrastructure/Canvas'
 import RaycastablePoint from './geometry/RaycastablePoint'
@@ -17,15 +17,15 @@ export default class Raycaster {
    * @param pEnd? - Optional ending point up to which the cast will be performed
    *
    * @returns {
-   *   hitObject, // the game object that has been hit. If no object are hit - hitObject is `null`
-   *   hitPoint   // can be either a point where the ray intersects a game object, or a just a point outside the screen if no object is hit
+   *   wallHit, // the wall that has been hit. If no walls are hit - wallHit is `null`
+   *   hitPoint // can be either a point where the ray intersects a wall, or a just a point outside the screen if no wall is hit
    * }
    */
   public static cast(
     p: RaycastablePoint,
     theta: number,
     pEnd?: RaycastablePoint
-  ): { hitPoint: Point, hitObject: GameObject } {
+  ): { hitPoint: Point, wallHit: Wall } {
     if (theta >= 0) { // South
       const xInt = p.deltas.dyBottom / Math.tan(theta)
 
@@ -70,7 +70,7 @@ export default class Raycaster {
     // I have to check if results exist because sometimes .cast() can return 'undefined'..
     // Why .cast() sometimes returns 'undefined' could be worth investigating in the future..
     if (results) {
-      return results.hitObject !== null
+      return results.wallHit !== null
     }
     else {
       return true
@@ -183,12 +183,12 @@ export default class Raycaster {
   private static rangeVertical: number   = Canvas.halfHeight + Raycaster.outsideOfScreenOffset * 2
 
   // TODO: This is a naive implementation! Add 6x optimization
-  private static getInterceptPointSE(p: RaycastablePoint, theta: number, pEnd?: RaycastablePoint): { hitPoint: Point, hitObject: GameObject } {
+  private static getInterceptPointSE(p: RaycastablePoint, theta: number, pEnd?: RaycastablePoint): { hitPoint: Point, wallHit: Wall } {
     // ########################################################################
     // Vertical Intercepts
     // ########################################################################
     let hitPointVertical: Point = null
-    let objectHitVertical: GameObject = null
+    let wallHitVertical: Wall = null
 
     let i = 0
     let yIntercept
@@ -233,9 +233,9 @@ export default class Raycaster {
         context.stroke()
       }
 
-      objectHitVertical = Raycaster.checkGameObjectCollisionVerticalSE(i, p, yIntercept)
+      wallHitVertical = Raycaster.checkWallCollisionVerticalSE(i, p, yIntercept)
 
-      if (objectHitVertical) {
+      if (wallHitVertical) {
         hitPointVertical = { x: tileStepX + p.deltas.dxRight, y: yIntercept }
         break
       }
@@ -246,7 +246,7 @@ export default class Raycaster {
     // Horizontal Intercepts
     // ########################################################################
     let hitPointHorizontal: Point = null
-    let objectHitHorizontal: GameObject = null
+    let wallHitHorizontal: Wall = null
 
     let j = 0
     let xIntercept
@@ -296,9 +296,9 @@ export default class Raycaster {
         break
       }
 
-      objectHitHorizontal = Raycaster.checkGameObjectCollisionHorizontalSE(j, p, xIntercept)
+      wallHitHorizontal = Raycaster.checkWallCollisionHorizontalSE(j, p, xIntercept)
 
-      if (objectHitHorizontal) {
+      if (wallHitHorizontal) {
         hitPointHorizontal = { x: xIntercept, y: tileStepY + p.deltas.dyBottom }
         break
       }
@@ -312,13 +312,13 @@ export default class Raycaster {
     if (hitPointVertical && hitPointHorizontal === null) {
       return {
         hitPoint  : hitPointVertical,
-        hitObject : objectHitVertical
+        wallHit : wallHitVertical
       }
     }
     else if (hitPointHorizontal && hitPointVertical === null) {
       return {
         hitPoint  : hitPointHorizontal,
-        hitObject : objectHitHorizontal
+        wallHit : wallHitHorizontal
       }
     }
     else if (hitPointHorizontal && hitPointVertical) {
@@ -327,12 +327,12 @@ export default class Raycaster {
       if (verticalHitDistanceFromPlayer > horizontalHitDistanceFromPlayer) {
         return {
           hitPoint  : hitPointHorizontal,
-          hitObject : objectHitHorizontal
+          wallHit : wallHitHorizontal
         }
       } else {
         return {
           hitPoint  : hitPointVertical,
-          hitObject : objectHitVertical
+          wallHit : wallHitVertical
         }
       }
     }
@@ -345,24 +345,24 @@ export default class Raycaster {
       if (verticalHitDistanceFromPlayer > horizontalHitDistanceFromPlayer) {
         return {
           hitPoint  : hitPointHorizontal,
-          hitObject : objectHitHorizontal
+          wallHit : wallHitHorizontal
         }
       } else {
         return {
           hitPoint  : hitPointVertical,
-          hitObject : objectHitVertical
+          wallHit : wallHitVertical
         }
       }
     }
   }
 
   // TODO: This is a naive implementation! Add 6x optimization
-  private static getInterceptPointNE(p: RaycastablePoint, theta: number, pEnd?: RaycastablePoint): { hitPoint: Point, hitObject: GameObject } {
+  private static getInterceptPointNE(p: RaycastablePoint, theta: number, pEnd?: RaycastablePoint): { hitPoint: Point, wallHit: Wall } {
     // ########################################################################
     // Vertical Intercepts
     // ########################################################################
     let hitPointVertical: Point = null
-    let objectHitVertical: GameObject = null
+    let wallHitVertical: Wall = null
 
     let i = 0
     let yIntercept
@@ -407,9 +407,9 @@ export default class Raycaster {
         context.stroke()
       }
 
-      objectHitVertical = Raycaster.checkGameObjectCollisionVerticalNE(i, p, yIntercept)
+      wallHitVertical = Raycaster.checkWallCollisionVerticalNE(i, p, yIntercept)
 
-      if (objectHitVertical) {
+      if (wallHitVertical) {
         hitPointVertical = { x: tileStepX + p.deltas.dxRight, y: -yIntercept }
         break
       }
@@ -420,7 +420,7 @@ export default class Raycaster {
     // Horizontal Intercepts
     // ########################################################################
     let hitPointHorizontal: Point = null
-    let objectHitHorizontal: GameObject = null
+    let wallHitHorizontal: Wall = null
 
     let j = 0
     let xIntercept
@@ -470,9 +470,9 @@ export default class Raycaster {
         break
       }
 
-      objectHitHorizontal = Raycaster.checkGameObjectCollisionHorizontalNE(j, p, xIntercept)
+      wallHitHorizontal = Raycaster.checkWallCollisionHorizontalNE(j, p, xIntercept)
 
-      if (objectHitHorizontal) {
+      if (wallHitHorizontal) {
         hitPointHorizontal = { x: xIntercept, y: -tileStepY - p.deltas.dyTop }
         break
       }
@@ -486,13 +486,13 @@ export default class Raycaster {
     if (hitPointVertical && hitPointHorizontal === null) {
       return {
         hitPoint  : hitPointVertical,
-        hitObject : objectHitVertical
+        wallHit : wallHitVertical
       }
     }
     else if (hitPointHorizontal && hitPointVertical === null) {
       return {
         hitPoint  : hitPointHorizontal,
-        hitObject : objectHitHorizontal
+        wallHit : wallHitHorizontal
       }
     }
     else if (hitPointHorizontal && hitPointVertical) {
@@ -501,12 +501,12 @@ export default class Raycaster {
       if (verticalHitDistanceFromPlayer > horizontalHitDistanceFromPlayer) {
         return {
           hitPoint  : hitPointHorizontal,
-          hitObject : objectHitHorizontal
+          wallHit : wallHitHorizontal
         }
       } else {
         return {
           hitPoint  : hitPointVertical,
-          hitObject : objectHitVertical
+          wallHit : wallHitVertical
         }
       }
     }
@@ -519,24 +519,24 @@ export default class Raycaster {
       if (verticalHitDistanceFromPlayer > horizontalHitDistanceFromPlayer) {
         return {
           hitPoint  : hitPointHorizontal,
-          hitObject : objectHitHorizontal
+          wallHit : wallHitHorizontal
         }
       } else {
         return {
           hitPoint  : hitPointVertical,
-          hitObject : objectHitVertical
+          wallHit : wallHitVertical
         }
       }
     }
   }
 
   // TODO: This is a naive implementation! Add 6x optimization
-  private static getInterceptPointNW(p: Point, theta: number, pEnd?: Point): { hitPoint: Point, hitObject: GameObject } {
+  private static getInterceptPointNW(p: Point, theta: number, pEnd?: Point): { hitPoint: Point, wallHit: Wall } {
     // ########################################################################
     // Vertical Intercepts
     // ########################################################################
     let hitPointVertical: Point = null
-    let objectHitVertical: GameObject = null
+    let wallHitVertical: Wall = null
 
     let i = 0
     let yIntercept
@@ -581,9 +581,9 @@ export default class Raycaster {
         context.stroke()
       }
 
-      objectHitVertical = Raycaster.checkGameObjectCollisionVerticalNW(i, p, yIntercept)
+      wallHitVertical = Raycaster.checkWallCollisionVerticalNW(i, p, yIntercept)
 
-      if (objectHitVertical) {
+      if (wallHitVertical) {
         hitPointVertical = { x: - tileStepX - p.deltas.dxLeft, y: -yIntercept }
         break
       }
@@ -594,7 +594,7 @@ export default class Raycaster {
     // Horizontal Intercepts
     // ########################################################################
     let hitPointHorizontal: Point = null
-    let objectHitHorizontal: GameObject = null
+    let wallHitHorizontal: Wall = null
 
     let j = 0
     let xIntercept
@@ -644,9 +644,9 @@ export default class Raycaster {
         break
       }
 
-      objectHitHorizontal = Raycaster.checkGameObjectCollisionHorizontalNW(j, p, xIntercept)
+      wallHitHorizontal = Raycaster.checkWallCollisionHorizontalNW(j, p, xIntercept)
 
-      if (objectHitHorizontal) {
+      if (wallHitHorizontal) {
         hitPointHorizontal = { x: -xIntercept, y: -tileStepY - p.deltas.dyTop }
         break
       }
@@ -660,13 +660,13 @@ export default class Raycaster {
     if (hitPointVertical && hitPointHorizontal === null) {
       return {
         hitPoint  : hitPointVertical,
-        hitObject : objectHitVertical
+        wallHit : wallHitVertical
       }
     }
     else if (hitPointHorizontal && hitPointVertical === null) {
       return {
         hitPoint  : hitPointHorizontal,
-        hitObject : objectHitHorizontal
+        wallHit : wallHitHorizontal
       }
     }
     else if (hitPointHorizontal && hitPointVertical) {
@@ -675,12 +675,12 @@ export default class Raycaster {
       if (verticalHitDistanceFromPlayer > horizontalHitDistanceFromPlayer) {
         return {
           hitPoint  : hitPointHorizontal,
-          hitObject : objectHitHorizontal
+          wallHit : wallHitHorizontal
         }
       } else {
         return {
           hitPoint  : hitPointVertical,
-          hitObject : objectHitVertical
+          wallHit : wallHitVertical
         }
       }
     }
@@ -693,24 +693,24 @@ export default class Raycaster {
       if (verticalHitDistanceFromPlayer > horizontalHitDistanceFromPlayer) {
         return {
           hitPoint  : hitPointHorizontal,
-          hitObject : objectHitHorizontal
+          wallHit : wallHitHorizontal
         }
       } else {
         return {
           hitPoint  : hitPointVertical,
-          hitObject : objectHitVertical
+          wallHit : wallHitVertical
         }
       }
     }
   }
 
   // TODO: This is a naive implementation! Add 6x optimization
-  private static getInterceptPointSW(p: Point, theta: number, pEnd?: Point): { hitPoint: Point, hitObject: GameObject } {
+  private static getInterceptPointSW(p: Point, theta: number, pEnd?: Point): { hitPoint: Point, wallHit: Wall } {
     // ########################################################################
     // Vertical Intercepts
     // ########################################################################
     let hitPointVertical: Point = null
-    let objectHitVertical: GameObject = null
+    let wallHitVertical: Wall = null
 
     let i = 0
     let yIntercept
@@ -755,9 +755,9 @@ export default class Raycaster {
         context.stroke()
       }
 
-      objectHitVertical = Raycaster.checkGameObjectCollisionVerticalSW(i, p, yIntercept)
+      wallHitVertical = Raycaster.checkWallCollisionVerticalSW(i, p, yIntercept)
 
-      if (objectHitVertical) {
+      if (wallHitVertical) {
         hitPointVertical = { x: -tileStepX - p.deltas.dxLeft, y: yIntercept }
         break
       }
@@ -768,7 +768,7 @@ export default class Raycaster {
     // Horizontal Intercepts
     // ########################################################################
     let hitPointHorizontal: Point = null
-    let objectHitHorizontal: GameObject = null
+    let wallHitHorizontal: Wall = null
 
     let j = 0
     let xIntercept
@@ -818,9 +818,9 @@ export default class Raycaster {
         break
       }
 
-      objectHitHorizontal = Raycaster.checkGameObjectCollisionHorizontalSW(j, p, xIntercept)
+      wallHitHorizontal = Raycaster.checkWallCollisionHorizontalSW(j, p, xIntercept)
 
-      if (objectHitHorizontal) {
+      if (wallHitHorizontal) {
         hitPointHorizontal = { x: xIntercept, y: tileStepY + p.deltas.dyBottom }
         break
       }
@@ -828,19 +828,19 @@ export default class Raycaster {
     }
 
     // ########################################################################
-    // Return the closer hit point & hit object
+    // Return the closer hit point & hit wall
     // ########################################################################
 
     if (hitPointVertical && hitPointHorizontal === null) {
       return {
-        hitPoint  : hitPointVertical,
-        hitObject : objectHitVertical
+        hitPoint : hitPointVertical,
+        wallHit  : wallHitVertical
       }
     }
     else if (hitPointHorizontal && hitPointVertical === null) {
       return {
-        hitPoint  : hitPointHorizontal,
-        hitObject : objectHitHorizontal
+        hitPoint : hitPointHorizontal,
+        wallHit  : wallHitHorizontal
       }
     }
     else if (hitPointHorizontal && hitPointVertical) {
@@ -848,13 +848,13 @@ export default class Raycaster {
       const horizontalHitDistanceFromPlayer = Math.sqrt(Math.pow(hitPointHorizontal.x, 2) + Math.pow(hitPointHorizontal.y, 2))
       if (verticalHitDistanceFromPlayer > horizontalHitDistanceFromPlayer) {
         return {
-          hitPoint  : hitPointHorizontal,
-          hitObject : objectHitHorizontal
+          hitPoint : hitPointHorizontal,
+          wallHit  : wallHitHorizontal
         }
       } else {
         return {
-          hitPoint  : hitPointVertical,
-          hitObject : objectHitVertical
+          hitPoint : hitPointVertical,
+          wallHit  : wallHitVertical
         }
       }
     }
@@ -867,157 +867,157 @@ export default class Raycaster {
       if (verticalHitDistanceFromPlayer > horizontalHitDistanceFromPlayer) {
         return {
           hitPoint  : hitPointHorizontal,
-          hitObject : objectHitHorizontal
+          wallHit : wallHitHorizontal
         }
       } else {
         return {
           hitPoint  : hitPointVertical,
-          hitObject : objectHitVertical
+          wallHit : wallHitVertical
         }
       }
     }
   }
 
-  private static checkGameObjectCollisionVerticalSE(i: number, p: Point, yIntercept: number): GameObject {
+  private static checkWallCollisionVerticalSE(i: number, p: Point, yIntercept: number): Wall {
     const xTile = 1 + p.col + i
     const yTile = p.row + Math.floor((p.deltas.dyTop + yIntercept) / CONFIG.TILE_SIZE)
     const yTile_aboveByOnePixel = p.row + Math.floor((p.deltas.dyTop + yIntercept - 1) / CONFIG.TILE_SIZE)
 
-    let gameObjectHit = null
-    if (gameObjects[yTile]) {
-      if (gameObjects[yTile][xTile]) {
-        gameObjectHit = gameObjects[yTile][xTile]
+    let wallHit = null
+    if (walls[yTile]) {
+      if (walls[yTile][xTile]) {
+        wallHit = walls[yTile][xTile]
       }
-      else if (gameObjects[yTile_aboveByOnePixel][xTile]) {
-        gameObjectHit = gameObjects[yTile_aboveByOnePixel][xTile]
+      else if (walls[yTile_aboveByOnePixel][xTile]) {
+        wallHit = walls[yTile_aboveByOnePixel][xTile]
       }
     }
 
     if (CONFIG.DEBUG.RAYCASTER) {
-      context.fillText(`col: ${xTile}, row: ${yTile}, hit: ${gameObjectHit ? [gameObjectHit.row, gameObjectHit.col] : null}`, 10, 112 + i * 12)
+      context.fillText(`col: ${xTile}, row: ${yTile}, hit: ${wallHit ? [wallHit.row, wallHit.col] : null}`, 10, 112 + i * 12)
     }
 
-    return gameObjectHit
+    return wallHit
   }
-  private static checkGameObjectCollisionHorizontalSE(i: number, p: Point, xIntercept: number): GameObject {
+  private static checkWallCollisionHorizontalSE(i: number, p: Point, xIntercept: number): Wall {
     const xTile = p.col + Math.floor((p.deltas.dxLeft + xIntercept) / CONFIG.TILE_SIZE)
     const yTile = p.row + i + 1
 
-    let gameObjectHit = null
-    if (gameObjects[yTile] && gameObjects[yTile][xTile]) {
-      gameObjectHit = gameObjects[yTile][xTile]
+    let wallHit = null
+    if (walls[yTile] && walls[yTile][xTile]) {
+      wallHit = walls[yTile][xTile]
     }
 
     if (CONFIG.DEBUG.RAYCASTER) {
-      context.fillText(`col: ${xTile}, row: ${yTile}, hit: ${gameObjectHit ? [gameObjectHit.row, gameObjectHit.col] : null}`, 10, 212 + i * 12)
+      context.fillText(`col: ${xTile}, row: ${yTile}, hit: ${wallHit ? [wallHit.row, wallHit.col] : null}`, 10, 212 + i * 12)
     }
 
-    return gameObjectHit
+    return wallHit
   }
 
-  private static checkGameObjectCollisionVerticalNE(i: number, p: Point, yIntercept: number): GameObject {
+  private static checkWallCollisionVerticalNE(i: number, p: Point, yIntercept: number): Wall {
     const xTile = 1 + p.col + i
     const yTile = p.row + Math.floor((p.deltas.dyTop - yIntercept) / CONFIG.TILE_SIZE)
 
-    let gameObjectHit = null
-    if (gameObjects[yTile] && gameObjects[yTile][xTile]) {
-      gameObjectHit = gameObjects[yTile][xTile]
+    let wallHit = null
+    if (walls[yTile] && walls[yTile][xTile]) {
+      wallHit = walls[yTile][xTile]
     }
 
     if (CONFIG.DEBUG.RAYCASTER) {
-      context.fillText(`col: ${xTile}, row: ${yTile}, hit: ${gameObjectHit ? [gameObjectHit.row, gameObjectHit.col] : null}`, 10, 112 + i * 12)
+      context.fillText(`col: ${xTile}, row: ${yTile}, hit: ${wallHit ? [wallHit.row, wallHit.col] : null}`, 10, 112 + i * 12)
     }
 
-    return gameObjectHit
+    return wallHit
   }
-  private static checkGameObjectCollisionHorizontalNE(i: number, p: Point, xIntercept: number): GameObject {
+  private static checkWallCollisionHorizontalNE(i: number, p: Point, xIntercept: number): Wall {
     const xTile = p.col + Math.floor((p.deltas.dxLeft + xIntercept) / CONFIG.TILE_SIZE)
     const xTile_leftByOnePixel = p.col + Math.floor((p.deltas.dxLeft + xIntercept - 1) / CONFIG.TILE_SIZE)
     const yTile = p.row - i - 1
 
-    let gameObjectHit = null
-    if (gameObjects[yTile]) {
-      if (gameObjects[yTile][xTile]) {
-        gameObjectHit = gameObjects[yTile][xTile]
+    let wallHit = null
+    if (walls[yTile]) {
+      if (walls[yTile][xTile]) {
+        wallHit = walls[yTile][xTile]
       }
-      else if (gameObjects[yTile][xTile_leftByOnePixel]) {
-        gameObjectHit = gameObjects[yTile][xTile_leftByOnePixel]
+      else if (walls[yTile][xTile_leftByOnePixel]) {
+        wallHit = walls[yTile][xTile_leftByOnePixel]
       }
     }
 
     if (CONFIG.DEBUG.RAYCASTER) {
-      context.fillText(`col: ${xTile}, row: ${yTile}, hit: ${gameObjectHit ? [gameObjectHit.row, gameObjectHit.col] : null}`, 10, 212 + i * 12)
+      context.fillText(`col: ${xTile}, row: ${yTile}, hit: ${wallHit ? [wallHit.row, wallHit.col] : null}`, 10, 212 + i * 12)
     }
 
-    return gameObjectHit
+    return wallHit
   }
 
-  private static checkGameObjectCollisionVerticalNW(i: number, p: Point, yIntercept: number): GameObject {
+  private static checkWallCollisionVerticalNW(i: number, p: Point, yIntercept: number): Wall {
     const xTile = - 1 + p.col - i
     const yTile = p.row + Math.floor((p.deltas.dyTop - yIntercept) / CONFIG.TILE_SIZE)
 
-    let gameObjectHit = null
-    if (gameObjects[yTile] && gameObjects[yTile][xTile]) {
-      gameObjectHit = gameObjects[yTile][xTile]
+    let wallHit = null
+    if (walls[yTile] && walls[yTile][xTile]) {
+      wallHit = walls[yTile][xTile]
     }
 
     if (CONFIG.DEBUG.RAYCASTER) {
-      context.fillText(`col: ${xTile}, row: ${yTile}, hit: ${gameObjectHit ? [gameObjectHit.row, gameObjectHit.col] : null}`, 10, 112 + i * 12)
+      context.fillText(`col: ${xTile}, row: ${yTile}, hit: ${wallHit ? [wallHit.row, wallHit.col] : null}`, 10, 112 + i * 12)
     }
 
-    return gameObjectHit
+    return wallHit
   }
-  private static checkGameObjectCollisionHorizontalNW(i: number, p: Point, xIntercept: number): GameObject {
+  private static checkWallCollisionHorizontalNW(i: number, p: Point, xIntercept: number): Wall {
     const xTile = p.col - Math.floor((p.deltas.dxRight + xIntercept) / CONFIG.TILE_SIZE)
     const yTile = p.row - i - 1
 
-    let gameObjectHit = null
-    if (gameObjects[yTile] && gameObjects[yTile][xTile]) {
-      gameObjectHit = gameObjects[yTile][xTile]
+    let wallHit = null
+    if (walls[yTile] && walls[yTile][xTile]) {
+      wallHit = walls[yTile][xTile]
     }
 
     if (CONFIG.DEBUG.RAYCASTER) {
-      context.fillText(`col: ${xTile}, row: ${yTile}, hit: ${gameObjectHit ? [gameObjectHit.row, gameObjectHit.col] : null}`, 10, 212 + i * 12)
+      context.fillText(`col: ${xTile}, row: ${yTile}, hit: ${wallHit ? [wallHit.row, wallHit.col] : null}`, 10, 212 + i * 12)
     }
 
-    return gameObjectHit
+    return wallHit
   }
 
-  private static checkGameObjectCollisionVerticalSW(i: number, p: Point, yIntercept: number): GameObject {
+  private static checkWallCollisionVerticalSW(i: number, p: Point, yIntercept: number): Wall {
     const xTile = p.col - i - 1
     const yTile = p.row + Math.floor((p.deltas.dyTop + yIntercept) / CONFIG.TILE_SIZE)
     const yTile_aboveByOnePixel = p.row + Math.floor((p.deltas.dyTop + yIntercept - 1) / CONFIG.TILE_SIZE)
 
-    let gameObjectHit = null
-    if (gameObjects[yTile]) {
-      if (gameObjects[yTile][xTile]) {
-        gameObjectHit = gameObjects[yTile][xTile]
+    let wallHit = null
+    if (walls[yTile]) {
+      if (walls[yTile][xTile]) {
+        wallHit = walls[yTile][xTile]
       }
-      else if (gameObjects[yTile_aboveByOnePixel][xTile]) {
-        gameObjectHit = gameObjects[yTile_aboveByOnePixel][xTile]
+      else if (walls[yTile_aboveByOnePixel][xTile]) {
+        wallHit = walls[yTile_aboveByOnePixel][xTile]
       }
     }
 
     if (CONFIG.DEBUG.RAYCASTER) {
-      context.fillText(`col: ${xTile}, row: ${yTile}, hit: ${gameObjectHit ? [gameObjectHit.row, gameObjectHit.col] : null}`, 10, 112 + i * 12)
+      context.fillText(`col: ${xTile}, row: ${yTile}, hit: ${wallHit ? [wallHit.row, wallHit.col] : null}`, 10, 112 + i * 12)
     }
 
-    return gameObjectHit
+    return wallHit
   }
-  private static checkGameObjectCollisionHorizontalSW(i: number, p: Point, xIntercept: number): GameObject {
+  private static checkWallCollisionHorizontalSW(i: number, p: Point, xIntercept: number): Wall {
     const xTile = p.col - Math.floor((p.deltas.dxRight - xIntercept) / CONFIG.TILE_SIZE)
     const yTile = p.row + i + 1
 
-    let gameObjectHit = null
-    if (gameObjects[yTile] && gameObjects[yTile][xTile]) {
-      gameObjectHit = gameObjects[yTile][xTile]
+    let wallHit = null
+    if (walls[yTile] && walls[yTile][xTile]) {
+      wallHit = walls[yTile][xTile]
     }
 
     if (CONFIG.DEBUG.RAYCASTER) {
-      context.fillText(`col: ${xTile}, row: ${yTile}, hit: ${gameObjectHit ? [gameObjectHit.row, gameObjectHit.col] : null}`, 10, 212 + i * 12)
+      context.fillText(`col: ${xTile}, row: ${yTile}, hit: ${wallHit ? [wallHit.row, wallHit.col] : null}`, 10, 212 + i * 12)
     }
 
-    return gameObjectHit
+    return wallHit
   }
 }
 

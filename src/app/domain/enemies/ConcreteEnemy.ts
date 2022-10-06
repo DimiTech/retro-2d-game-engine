@@ -8,7 +8,7 @@ import Canvas, { context } from '@app/infrastructure/Canvas'
 import Point, { pointToPointDistance } from '@app/infrastructure/geometry/Point'
 import CollisionBox from '@app/infrastructure/CollisionBox'
 import Raycaster from '@app/infrastructure/Raycaster'
-import { generatePathNodes, findShortestPath, drawPathNodes, drawNode } from '@app/infrastructure/Pathfinding'
+import { generatePathNodes, findShortestPath, debug_drawPathNodes, drawNode } from '@app/infrastructure/Pathfinding'
 
 import CreatureState from '@app/domain/CreatureState'
 import Player from '@app/domain/player/Player'
@@ -57,7 +57,7 @@ export default class ConcreteEnemy extends Enemy {
       this.setState(CreatureState.Idling)
     }
 
-    this.adjustCollisionWithGameObjects()
+    this.adjustCollisionWithWalls()
     this.checkForCollisionWithPlayer(player)
     this.checkForCollisionWithOtherEnemies(player)
     this.distanceFromTarget = pointToPointDistance(
@@ -113,20 +113,20 @@ export default class ConcreteEnemy extends Enemy {
 
   public draw(player: Player): void {
     if (CONFIG.DEBUG.ENEMY_COLLISION_BOX) {
-      this.drawCollisionBox(player)
+      this.debug_drawCollisionBox(player)
     }
     if (CONFIG.DEBUG.ENEMY_STATE) {
-      this.drawStateDebug(player)
+      this.debug_drawState(player)
     }
     if (CONFIG.DEBUG.RAY_TO_PLAYER) {
-      this.drawRayToPlayer(player)
+      this.debug_drawRayToPlayer(player)
     }
     if (CONFIG.DEBUG.PATHFINDING_NODES) {
-      drawPathNodes(this.pathfindingNodes, player, this.getHealthColor())
+      debug_drawPathNodes(this.pathfindingNodes, player, this.getHealthColor())
     }
 
     if (CONFIG.DEBUG.SHORTEST_PATH_TO_PLAYER) {
-      this.drawShortestPathToPlayer(player)
+      this.debug_drawShortestPathToPlayer(player)
     }
     this.sprite.draw(this, { x: player.x, y: player.y })
   }
@@ -272,7 +272,7 @@ export default class ConcreteEnemy extends Enemy {
   }
 
   // TODO: Compose this functionality since it's shared between enemies and player
-  private drawCollisionBox(player: Player) {
+  private debug_drawCollisionBox(player: Player) {
     context.strokeStyle = this.getHealthColor()
     context.lineWidth = 0.2
     context.beginPath()
@@ -286,8 +286,9 @@ export default class ConcreteEnemy extends Enemy {
     context.stroke()
   }
 
-  private drawStateDebug(player: Player) {
+  private debug_drawState(player: Player) {
     context.beginPath()
+      context.fillStyle = '#FFC100'
       context.font = '8px Monospace'
       context.fillText(
         this.state.toString(),
@@ -297,8 +298,7 @@ export default class ConcreteEnemy extends Enemy {
     context.stroke()
   }
 
-  // TODO: Just for debugging
-  private drawRayToPlayer(player: Player) {
+  private debug_drawRayToPlayer(player: Player) {
     if (this.thereAreObstaclesBetweenPlayerAndThisEnemy) {
       context.strokeStyle = '#FFFF44'
     } else {
@@ -311,21 +311,19 @@ export default class ConcreteEnemy extends Enemy {
     context.stroke()
   }
 
-  // TODO: Just for debugging
-  private drawShortestPathToPlayer(p: Player) {
+  private debug_drawShortestPathToPlayer(p: Player) {
     this.shortestPath
       .forEach((n, i) => {
         drawNode(n, p, n.visited ? '#FF0000' : '#FF00FF')
       })
     if (this.shortestPath.length > 0) {
       this.shortestPath.forEach((node, i) => {
-        this.drawRayFromPointToPoint(node, this.shortestPath[i - 1] || p, p)
+        this.debug_drawRayFromPointToPoint(node, this.shortestPath[i - 1] || p, p)
       })
     }
   }
 
-  // TODO: Just for debugging
-  private drawRayFromPointToPoint(p1: Point, p2: Point, player: Player) {
+  private debug_drawRayFromPointToPoint(p1: Point, p2: Point, player: Player) {
     context.strokeStyle = '#FF00FF'
     context.lineWidth = 0.2
     context.beginPath()

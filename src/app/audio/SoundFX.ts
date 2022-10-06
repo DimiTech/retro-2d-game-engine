@@ -101,7 +101,7 @@ export default class SoundFX {
     playSound.start()
   }
 
-  public static playCrateHit(): void {
+  public static playWallHit(): void {
     const playSound = context.createBufferSource()
     playSound.buffer = this.CRATE_HIT[0]
 

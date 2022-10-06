@@ -8,7 +8,7 @@ import { KEYBOARD_KEYS } from '@app/peripherals/constants/KeyCodes'
 import Mouse from '@app/peripherals/Mouse'
 import Gamepads from '@app/peripherals/Gamepads'
 
-import Map from '@app/domain/map/Map'
+import Map, { enemiesRemaining } from '@app/domain/map/Map'
 import Player from '@app/domain/player/Player'
 import GAME_STATES from './GameStates'
 
@@ -48,6 +48,7 @@ export default class GameStatePlaying implements IGameState {
       Gamepads.update(this.player)
       this.player.update()
       this.map.update()
+      this.checkForVictoryCondition()
     } else {
       Game.stateManager.setState(GAME_STATES.GAME_OVER)
     }
@@ -66,6 +67,22 @@ export default class GameStatePlaying implements IGameState {
     Keyboard.addListenerKeyup(this.player.keyupHandler)
 
     Mouse.init(this.playerSetShootingTrue, this.playerSetShootingFalse)
+  }
+
+  private checkForVictoryCondition() {
+    if (
+      enemiesRemaining() === 0 &&
+      this.checkIfPlayerIsInsideExitPortal()
+    ) {
+      Game.stateManager.setState(GAME_STATES.VICTORY)  
+    }
+  }
+
+  private checkIfPlayerIsInsideExitPortal(): boolean {
+    return (
+      this.player.row === Map.exitPortal.row &&
+      this.player.col === Map.exitPortal.col
+    )
   }
 
   public destroyGame(): void {

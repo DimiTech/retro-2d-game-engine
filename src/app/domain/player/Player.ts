@@ -42,7 +42,7 @@ export default class Player extends Creature {
 
     this.checkForCollisionWithEnemies()
     this.move()
-    this.adjustCollisionWithGameObjects()
+    this.adjustCollisionWithWalls()
     this.updateMapPosition()
     this.updateTileDeltas()
     this.shoot()
@@ -210,11 +210,11 @@ export default class Player extends Creature {
     context.stroke()
 
     if (CONFIG.DEBUG.PLAYER_COLLISION_BOX) {
-      this.drawCollisionBox()
+      this.debug_drawCollisionBox()
     }
   }
 
-  private drawCollisionBox() {
+  private debug_drawCollisionBox() {
     context.strokeStyle = this.getHealthColor()
 
     context.lineWidth = 0.5
@@ -245,9 +245,9 @@ export default class Player extends Creature {
   }
 
   private drawPlayerVisionRay(theta: number) {
-    const { hitPoint, hitObject } = Raycaster.cast(this, theta)
+    const { hitPoint, wallHit } = Raycaster.cast(this, theta)
     if (hitPoint) {
-      if (hitObject) {
+      if (wallHit) {
         Raycaster.drawRay(hitPoint, '#FF4444')
       } else {
         Raycaster.drawRay(hitPoint)

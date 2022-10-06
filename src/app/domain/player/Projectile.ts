@@ -3,7 +3,7 @@ import * as CONFIG from '@app/configuration/config.json'
 import Canvas, { context } from '@app/infrastructure/Canvas'
 
 import Enemy from '@app/domain/enemies/Enemy'
-import { gameObjects, enemies } from '@app/domain/map/Map'
+import { walls, enemies } from '@app/domain/map/Map'
 
 interface IntermediatePoint {
   x: number
@@ -57,12 +57,12 @@ export default class Projectile {
     this.intermediatePositions.forEach(intermediatePoint => {
       if (this.alive) {
         this.checkCollisionWithEnemies(nearbyEnemies, intermediatePoint)
-        this.checkCollisionWithGameObject(intermediatePoint)
+        this.checkCollisionWithWall(intermediatePoint)
       }
     })
     if (this.alive) {
       this.checkCollisionWithEnemies(nearbyEnemies)
-      this.checkCollisionWithGameObject()
+      this.checkCollisionWithWall()
     }
   }
 
@@ -137,17 +137,17 @@ export default class Projectile {
     })
   }
 
-  private checkCollisionWithGameObject(point?: IntermediatePoint | Projectile): void {
+  private checkCollisionWithWall(point?: IntermediatePoint | Projectile): void {
     if (!point) {
       point = this
     }
 
-    const o = gameObjects[point.row][point.col]
-    if (o) {
-        o.takeDamage(this.getDamage())
+    const wall = walls[point.row][point.col]
+    if (wall) {
+        wall.takeDamage(this.getDamage())
         this.alive = false
-        if (o.destructable) {
-          gameObjects[point.row][point.col] = null
+        if (wall.destructable) {
+          walls[point.row][point.col] = null
         }
     }
   }

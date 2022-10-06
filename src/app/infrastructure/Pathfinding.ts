@@ -1,10 +1,10 @@
 import * as CONFIG from '@app/configuration/config.json'
 
 import Point, { pointToPointDistance } from '@app/infrastructure/geometry/Point'
-import CollisionBox, { collisionBoxesIntersect } from '@app/infrastructure/CollisionBox'
+import CollisionBox from '@app/infrastructure/CollisionBox'
 import Canvas, { context } from '@app/infrastructure/Canvas'
 
-import { gameObjects } from '@app/domain/map/Map'
+import { walls } from '@app/domain/map/Map'
 import Player from '@app/domain/player/Player'
 import Enemy from '@app/domain/enemies/Enemy'
 import RaycastablePoint from './geometry/RaycastablePoint'
@@ -24,7 +24,7 @@ export function generatePathNodes(startRow: number, startCol: number, cBox: Coll
 
   for (let row = rowStart; row < rowEnd; ++row) {
     for (let col = colStart - 1; col < colEnd; ++col) {
-      if (!gameObjects[row] || !gameObjects[row][col]) {
+      if (!walls[row] || !walls[row][col]) {
         if (col > 0 && row > 0) {
           path.push(new PathNode({
             x: col * CONFIG.TILE_SIZE + CONFIG.TILE_SIZE / 2,
@@ -38,7 +38,7 @@ export function generatePathNodes(startRow: number, startCol: number, cBox: Coll
   return path
 }
 
-export function drawPathNodes(path: PathNode[], player: Player, color: string): void {
+export function debug_drawPathNodes(path: PathNode[], player: Player, color: string): void {
   if (path) {
     path.forEach(node => drawNode(node, player, color))
   }
@@ -107,29 +107,29 @@ export function findShortestPath(enemy: Enemy, player: Player, pathfindingNodes:
           (
             node.col === nodeCurrent.col - 1 && node.row === nodeCurrent.row - 1
             && (
-              !gameObjects[node.row    ] || gameObjects[node.row    ][node.col + 1] === null ||
-              !gameObjects[node.row + 1] || gameObjects[node.row + 1][node.col    ] === null
+              !walls[node.row    ] || walls[node.row    ][node.col + 1] === null ||
+              !walls[node.row + 1] || walls[node.row + 1][node.col    ] === null
             )
           ) || // NW
           (
             node.col === nodeCurrent.col + 1 && node.row === nodeCurrent.row - 1
             && (
-              !gameObjects[node.row    ] || gameObjects[node.row    ][node.col - 1] === null ||
-              !gameObjects[node.row + 1] || gameObjects[node.row + 1][node.col    ] === null
+              !walls[node.row    ] || walls[node.row    ][node.col - 1] === null ||
+              !walls[node.row + 1] || walls[node.row + 1][node.col    ] === null
             )
           ) || // NE
           (
             node.col === nodeCurrent.col + 1 && node.row === nodeCurrent.row + 1
             && (
-              !gameObjects[node.row    ] || gameObjects[node.row    ][node.col - 1] === null ||
-              !gameObjects[node.row - 1] || gameObjects[node.row - 1][node.col    ] === null
+              !walls[node.row    ] || walls[node.row    ][node.col - 1] === null ||
+              !walls[node.row - 1] || walls[node.row - 1][node.col    ] === null
             )
           ) || // SE
           (
             node.col === nodeCurrent.col - 1 && node.row === nodeCurrent.row + 1
             && (
-              !gameObjects[node.row    ] || gameObjects[node.row    ][node.col + 1] === null ||
-              !gameObjects[node.row - 1] || gameObjects[node.row - 1][node.col    ] === null
+              !walls[node.row    ] || walls[node.row    ][node.col + 1] === null ||
+              !walls[node.row - 1] || walls[node.row - 1][node.col    ] === null
             )
           ) // SW
         )

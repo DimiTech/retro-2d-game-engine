@@ -3,4 +3,5 @@ export default interface IGameState {
   exit(nextState?: IGameState): void
   update(): void
   render(): void
+  destroyGame?(): void 
 }
