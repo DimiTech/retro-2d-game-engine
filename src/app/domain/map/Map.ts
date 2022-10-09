@@ -20,6 +20,8 @@ export default class Map {
   public static enemies: Enemy[] = []
   public static exitPortal: Portal
 
+  public player: Player
+
   public static getEnemiesOnScreen(playerX: number, playerY: number): Enemy[] {
     return Map.enemies.filter(e => e.isOnScreen(playerX, playerY))
   }
@@ -28,8 +30,10 @@ export default class Map {
     return Map.enemies.length
   }
 
-  constructor(private player: Player) {
-    this.loadMap(getMapData(Level.currentLevel))
+  constructor() {
+    const mapData = getMapData(Level.currentLevel)
+    this.loadMap(mapData)
+    this.player = new Player(mapData.player.x, mapData.player.y)
   }
 
   public destroy() {

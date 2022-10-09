@@ -60,8 +60,8 @@ export default class GameStatePlaying implements IGameState {
   }
 
   private startNewGame(): void {
-    this.player = new Player(128, 64)
-    this.map = new Map(this.player)
+    this.map = new Map()
+    this.player = this.map.player
 
     Keyboard.addListenerKeydown(this.player.keydownHandler)
     Keyboard.addListenerKeyup(this.player.keyupHandler)
