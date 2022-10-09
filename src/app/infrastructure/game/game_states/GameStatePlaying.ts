@@ -11,6 +11,7 @@ import Gamepads from '@app/peripherals/Gamepads'
 
 import Map from '@app/domain/map/Map'
 import Player from '@app/domain/player/Player'
+import Level from '@app/domain/Level'
 
 export default class GameStatePlaying implements IGameState {
   private player: Player
@@ -50,6 +51,7 @@ export default class GameStatePlaying implements IGameState {
       this.map.update()
       this.checkForLevelClearedCondition()
     } else {
+      Level.resetToStartingLevel()
       Game.stateManager.setState(GAME_STATES.GAME_OVER)
     }
   }
