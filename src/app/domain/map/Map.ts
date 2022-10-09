@@ -1,6 +1,5 @@
 import * as CONFIG from '@app/configuration/config.json'
 
-
 import Player from '@app/domain/player/Player'
 import CreatureState from '@app/domain/CreatureState'
 import ConcreteEnemy from '@app/domain/enemies/ConcreteEnemy'
@@ -13,7 +12,8 @@ import WallFactory from '@app/domain/objects/wall/WallFactory'
 import Portal from '@app/domain/objects/portal/Portal'
 
 import IMap from './IMap'
-import * as Map01 from '@app/resources/maps/Map-01.json'
+import getMapData from '@app/domain/map/Maps'
+import Level from '@app/domain/Level'
 
 export default class Map {
   public static walls: Wall[][] = []
@@ -29,7 +29,7 @@ export default class Map {
   }
 
   constructor(private player: Player) {
-    this.loadMap(Map01)
+    this.loadMap(getMapData(Level.currentLevel))
   }
 
   public destroy() {

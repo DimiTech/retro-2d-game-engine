@@ -8,7 +8,9 @@ import { context } from '@app/infrastructure/Canvas'
 import IGameState from './IGameState'
 import GAME_STATES from './GameStates'
 
-export default class GameStateVictory implements IGameState {
+import Level from '@app/domain/Level'
+
+export default class GameStateLevelCleared implements IGameState {
   public enter(): void {
     window.addEventListener('keydown', this.handleEnterPress)
   }
@@ -21,25 +23,28 @@ export default class GameStateVictory implements IGameState {
   }
 
   public render(): void {
-    this.drawVictoryScreen()
+    this.drawLevelClearedStatistics()
   }
 
   private handleEnterPress = (e: KeyboardEvent) => {
-    switch (e.keyCode) {
-      case KEYBOARD_KEYS.ENTER:
-        Game.stateManager.setState(GAME_STATES.MAIN_MENU)
-        break
+    if (e.keyCode === KEYBOARD_KEYS.ENTER) {
+      if (Level.isLastLevel()) {
+        Game.stateManager.setState(GAME_STATES.VICTORY)  
+      } else {
+        Level.nextLevel()
+        Game.stateManager.setState(GAME_STATES.PLAYING)
+      }
     }
   }
 
-  private drawVictoryScreen(): void {
+  private drawLevelClearedStatistics(): void {
     context.beginPath()
-      context.fillStyle = '#00dd00'
-      context.font = '32px Monospace'
+      context.fillStyle = '#5555ff'
+      context.font = '22px Monospace'
       context.fillText(
-        'VICTORY!',
-        CONFIG.CANVAS_WIDTH / 2 - 80,
-        (CONFIG.CANVAS_HEIGHT / 2) + 10
+        `Level ${Level.currentLevel} Cleared!`,
+        CONFIG.CANVAS_WIDTH / 2 - 100,
+        (CONFIG.CANVAS_HEIGHT / 2)
       )
     context.stroke()
   }

@@ -71,11 +71,12 @@ Inspired by [Red Faction 2 controls](https://www.gamesdatabase.org/Media/SYSTEM/
 Overview of game states and possible transitions:
 
 ```
-                    ---------------------
-                  / ----------            \
-                 v v           \           \
-Loading ---> Main Menu ---> Playing ---> Paused
-                                ^         /
-                                 \       /
-                                   -----
+                     -------------
+                   /               \
+                  / ----------      Paused
+                 v v           \   /  
+Loading ---> Main Menu ---> Playing ---> Level Cleared ---> Victory
+                             /  ^         /
+                            v    \       /
+                     Game Over     -----
 ```

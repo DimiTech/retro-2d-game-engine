@@ -1,4 +1,5 @@
 import IGameState from './IGameState'
+import GAME_STATES from './GameStates'
 
 import Game from '@app/infrastructure/game/Game'
 import Canvas from '@app/infrastructure/Canvas'
@@ -10,7 +11,6 @@ import Gamepads from '@app/peripherals/Gamepads'
 
 import Map from '@app/domain/map/Map'
 import Player from '@app/domain/player/Player'
-import GAME_STATES from './GameStates'
 
 export default class GameStatePlaying implements IGameState {
   private player: Player
@@ -48,7 +48,7 @@ export default class GameStatePlaying implements IGameState {
       Gamepads.update(this.player)
       this.player.update()
       this.map.update()
-      this.checkForVictoryCondition()
+      this.checkForLevelClearedCondition()
     } else {
       Game.stateManager.setState(GAME_STATES.GAME_OVER)
     }
@@ -69,12 +69,12 @@ export default class GameStatePlaying implements IGameState {
     Mouse.init(this.playerSetShootingTrue, this.playerSetShootingFalse)
   }
 
-  private checkForVictoryCondition() {
-    if (
+  private checkForLevelClearedCondition() {
+    if ( // TODO: Extract Level Cleared conditions (they won't be the same for every level)
       Map.enemiesRemaining() === 0 &&
       this.checkIfPlayerIsInsideExitPortal()
     ) {
-      Game.stateManager.setState(GAME_STATES.VICTORY)  
+        Game.stateManager.setState(GAME_STATES.LEVEL_CLEARED)  
     }
   }
 

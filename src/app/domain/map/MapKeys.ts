@@ -7,7 +7,11 @@ enum MapKeys {
 }
 
 export function isWall(mapKey: MapKeys) {
-  return MapKeys[mapKey].startsWith('Wall')
+  return (
+    mapKey ===  MapKeys.WallGray  ||
+    mapKey ===  MapKeys.WallGreen ||
+    mapKey ===  MapKeys.WallBlue
+  )
 }
 
 export default MapKeys
