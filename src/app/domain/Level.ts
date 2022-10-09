@@ -3,7 +3,9 @@ import { totalNumberOfMaps } from '@app/domain/map/Maps'
 export default class Level {
     public static lastLevel = totalNumberOfMaps
 
-    public static currentLevel = 1 // Start with Level 1
+    public static readonly startingLevel = 1
+
+    public static currentLevel = Level.startingLevel
 
     public static nextLevel() {
         Level.currentLevel++
@@ -12,5 +14,4 @@ export default class Level {
     public static isLastLevel() {
         return (Level.currentLevel === Level.lastLevel)
     }
-
 }

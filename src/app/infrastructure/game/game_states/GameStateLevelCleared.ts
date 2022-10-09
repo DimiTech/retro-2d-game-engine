@@ -29,6 +29,7 @@ export default class GameStateLevelCleared implements IGameState {
   private handleEnterPress = (e: KeyboardEvent) => {
     if (e.keyCode === KEYBOARD_KEYS.ENTER) {
       if (Level.isLastLevel()) {
+        Level.currentLevel = Level.startingLevel
         Game.stateManager.setState(GAME_STATES.VICTORY)  
       } else {
         Level.nextLevel()
