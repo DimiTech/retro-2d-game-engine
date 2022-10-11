@@ -3,6 +3,7 @@ import * as CONFIG from '@app/configuration/config.json'
 import { KEYBOARD_KEYS } from '@app/peripherals/constants/KeyCodes'
 
 import Canvas, { context } from '@app/infrastructure/Canvas'
+import GameTime from '@app/infrastructure/GameTime'
 import Raycaster from '@app/infrastructure/Raycaster'
 import CollisionBox, {
   collisionBoxesIntersect,
@@ -21,11 +22,15 @@ export default class Player extends Creature {
   public rotation: number = 0
   public sightLineLength = 10
   private shooting = false
-  private shootingCooldown = 6
+
+  // TODO: Adjust for attack feeling
+  private attackSpeed = 0.1 // seconds
+  private attackCooldown = 0
+
   private projectiles: Projectile[] = []
 
   constructor(public x: number, public y: number) {
-    super(x, y, new CollisionBox(12, 12), 0.2, 1)
+    super(x, y, new CollisionBox(12, 12), 0.18, 1)
   }
 
   public update(): void {
@@ -110,8 +115,15 @@ export default class Player extends Creature {
       }
   }
 
+  public setShooting(isShooting: boolean): void {
+    this.shooting = isShooting
+  }
+
   public shoot(): void {
-    if (this.shooting && this.shootingCooldown <= 0) {
+    if (this.shooting === false) {
+      return
+    }
+    if (this.attackCooldown <= 0) {
       const dx = Canvas.mousePosition.x - Canvas.center.x
       const dy = Canvas.mousePosition.y - Canvas.center.y
       let xVel = dx / (Math.abs(dx) + Math.abs(dy))
@@ -127,16 +139,16 @@ export default class Player extends Creature {
       }
 
       this.projectiles.push(new Projectile(this.x, this.y, xVel, yVel))
-      this.shootingCooldown = 6
+      this.resetAttackCooldown()
 
       SoundFX.playSMG()
     } else {
-      --this.shootingCooldown
+      this.attackCooldown -= GameTime.frameElapsedTime
     }
   }
 
-  public setShooting(isShooting: boolean): void {
-    this.shooting = isShooting
+  protected resetAttackCooldown() {
+    this.attackCooldown = (1000 * this.attackSpeed) / CONFIG.GAME_SPEED
   }
 
   public takeDamage(damageAmount: number): void {

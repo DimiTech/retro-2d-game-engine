@@ -3,6 +3,7 @@ import * as CONFIG from '@app/configuration/config.json'
 import SoundFX from '@app/audio/SoundFX'
 
 import Game from '@app/infrastructure/game/Game'
+import GameTime from '@app/infrastructure/GameTime'
 import GAME_STATES from '@app/infrastructure/game/game_states/GameStates'
 import Canvas, { context } from '@app/infrastructure/Canvas'
 import Point, { pointToPointDistance } from '@app/infrastructure/geometry/Point'
@@ -20,14 +21,19 @@ export default class ConcreteEnemy extends Enemy {
   protected sprite: CreatureSprite = Sprites.Zerg
   protected target: Point
 
-  protected attackSpeed = 32
+  // TODO: Extract to CreatureState objects
+  // TODO: Adjust the feeling of enemy attack & animation
+  protected attackSpeed = 0.45 // seconds
+  private animationLengthAttack   = 420 // ms
+  private animationProgressAttack = 0   // ms
+  private animationLengthMove   = 330 // ms
+  private animationProgressMove = 0   // ms
 
   constructor(
     x: number,
     y: number,
     speed: number,
     healthPercentage: number,
-    protected pathfindingInterval: number
   ) {
     super(x, y, new CollisionBox(14, 14), speed, healthPercentage)
   }
@@ -147,16 +153,20 @@ export default class ConcreteEnemy extends Enemy {
   }
 
   protected advanceAnimation(): void {
+    // TODO: Extract to CreatureState objects
     if (this.state === CreatureState.Attacking) {
-      this.animationPosition = (this.animationPosition + 0.15) % this.sprite.numberOfSpritesInAnimation.attacking
+      this.animationProgressAttack = (this.animationProgressAttack + GameTime.elapsedTimeFactor) % this.animationLengthAttack
+      this.animationSpritePosition = Math.round((this.animationProgressAttack / this.animationLengthAttack) * this.sprite.numberOfSpritesInAnimation.attacking) % this.sprite.numberOfSpritesInAnimation.attacking
     } else if (this.state === CreatureState.Moving) {
-     this.animationPosition = (this.animationPosition + 0.25) % this.sprite.numberOfSpritesInAnimation.walking
+      this.animationProgressMove = (this.animationProgressMove + GameTime.elapsedTimeFactor) % this.animationLengthMove
+      this.animationSpritePosition = Math.round((this.animationProgressMove / this.animationLengthMove) * this.sprite.numberOfSpritesInAnimation.walking) % this.sprite.numberOfSpritesInAnimation.walking
     }
   }
 
+  // TODO: Move to Enemy
   private findPathToPlayer(player: Player, thereAreObstaclesBetweenPlayerAndThisEnemy: boolean) {
     if (thereAreObstaclesBetweenPlayerAndThisEnemy) { // TODO: || this.isStuck()
-      if (this.pathfindingInterval === 0) {
+      if (this.pathfindingTimer === 0) {
         this.pathfindingNodes = generatePathNodes(
           Math.round(Math.abs(player.row + this.row) / 2),
           Math.round(Math.abs(player.col + this.col) / 2),
@@ -165,7 +175,10 @@ export default class ConcreteEnemy extends Enemy {
         this.shortestPath = findShortestPath(this, player, this.pathfindingNodes)
       }
 
-      this.pathfindingInterval = (this.pathfindingInterval + 1) % this.pathfindingPeriod
+      this.pathfindingTimer += GameTime.elapsedTimeFactor
+      if (this.pathfindingTimer > this.pathfindingInterval) {
+        this.pathfindingTimer = 0
+      }
 
       if (this.shortestPath.length > 0) {
         this.followTheShortestPath()
@@ -283,5 +296,18 @@ export default class ConcreteEnemy extends Enemy {
       context.moveTo(Canvas.center.x + (p2.x - player.x), Canvas.center.y + (p2.y - player.y))
       context.lineTo(Canvas.center.x + (p1.x - player.x), Canvas.center.y + (p1.y - player.y))
     context.stroke()
+  }
+
+  // Move to Animation objects
+  protected resetAnimation() {
+    this.animationSpritePosition = 0
+    this.animationProgressAttack = 0
+    this.animationProgressMove = 0
+  }
+
+  public setState(newState: CreatureState) {
+    this.previousState = this.state
+    this.state = newState
+    this.resetAnimation()
   }
 }

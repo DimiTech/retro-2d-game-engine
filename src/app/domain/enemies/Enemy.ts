@@ -1,10 +1,13 @@
 import * as CONFIG from '@app/configuration/config.json'
 
-import Creature from '@app/domain/Creature'
-import Player from '@app/domain/player/Player'
+import GameTime from '@app/infrastructure/GameTime'
 import CollisionBox from '@app/infrastructure/CollisionBox'
 import { PathNode } from '@app/infrastructure/Pathfinding'
 import CreatureSprite from '@app/graphics/sprites/CreatureSprite'
+
+import Creature from '@app/domain/Creature'
+import Player from '@app/domain/player/Player'
+
 import SoundFX from '@app/audio/SoundFX'
 
 import Map from '../map/Map'
@@ -14,15 +17,16 @@ export default abstract class Enemy extends Creature {
 
   protected distanceFromTarget: number
   protected thereAreObstaclesBetweenPlayerAndThisEnemy: boolean
-  protected pathfindingInterval: number = 0
-  protected pathfindingPeriod: number = 30
+  protected pathfindingTimer: number = 0
+  protected pathfindingInterval: number = 500 // ms
   protected pathfindingNodes: PathNode[]
   protected shortestPath: PathNode[] = []
 
   protected sprite: CreatureSprite
 
-  protected readonly attackSpeed: number // Frames
-  protected attackCooldown: number
+  // TODO: Move this to Weapon
+  protected readonly attackSpeed: number // seconds
+  protected attackCooldown: number       // milliseconds
 
   constructor(
     x: number,
@@ -33,8 +37,8 @@ export default abstract class Enemy extends Creature {
   ) {
     super(x, y, collisionBox, speed, healthPercentage)
 
-    // TODO: Move this as well
-    this.attackCooldown = this.attackSpeed // TODO: Extract to initializeAttackParameters() or somehting...
+    // TODO: Move this function to Weapon
+    this.resetAttackCooldown()
   }
 
   public abstract draw(player: Player): void
@@ -79,10 +83,6 @@ export default abstract class Enemy extends Creature {
     const sumOfCollisionBoxHalfDiagonals = (target.collisionBox.halfWidth + this.collisionBox.halfWidth) * Math.sqrt(2)
     return this.distanceFromTarget < sumOfCollisionBoxHalfDiagonals
   }
-  
-  protected resetAttackCooldown() {
-    this.attackCooldown = this.attackSpeed
-  }
 
   protected checkIfStuck(): boolean {
     const xIsStatic = this.prevX.every((x) => x === this.prevX[0])
@@ -101,8 +101,12 @@ export default abstract class Enemy extends Creature {
       SoundFX.playSMG() // TODO: Change the SFX
       this.dealDamage(p)
     } else {
-      --this.attackCooldown
+      this.attackCooldown -= GameTime.frameElapsedTime
     }
+  }
+
+  protected resetAttackCooldown() {
+    this.attackCooldown = (1000 * this.attackSpeed) / CONFIG.GAME_SPEED
   }
 
   protected dealDamage(p: Player) {

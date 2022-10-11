@@ -23,7 +23,7 @@ export default abstract class Creature {
   public state: CreatureState = CreatureState.Idling
   public previousState: CreatureState = CreatureState.Idling // TODO: Use `previousState` for something? (Currently it's unused)
 
-  public animationPosition: number = 0
+  public animationSpritePosition: number = 0
 
   public direction: Directions
   public moving = {
@@ -370,15 +370,5 @@ export default abstract class Creature {
     } else if (this.health === this.maxHealth) {
       return '#6AFF00'
     }
-  }
-
-  protected resetAnimation() {
-    this.animationPosition = 0
-  }
-
-  public setState(newState: CreatureState) {
-    this.previousState = this.state
-    this.state = newState
-    this.resetAnimation()
   }
 }

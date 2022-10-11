@@ -78,7 +78,7 @@ export default class SpriteZerg extends CreatureSprite {
     context.drawImage(
       this.spriteSheet,
       spriteOffsets.x + this.spriteStep.x * spriteLocation.col,
-      spriteOffsets.y + this.spriteStep.y * Math.floor(enemy.animationPosition),
+      spriteOffsets.y + this.spriteStep.y * Math.floor(enemy.animationSpritePosition),
       this.spriteSize,
       this.spriteSize,
       spriteLocation.flip ? 0 - this.spriteSize / 2 : Canvas.center.x + (x - px - cBox.halfWidth),  // Canvas Desination X
