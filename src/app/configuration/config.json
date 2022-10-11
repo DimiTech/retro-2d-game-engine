@@ -6,6 +6,7 @@
   "GAME_SPEED": 1,
   "DEBUG": {
     "FPS": true,
+    "SHOW_LEVEL_TIME": true,
     "RAYCASTER": false,
     "RAY_TO_PLAYER": false,
     "PATHFINDING_NODES": false,

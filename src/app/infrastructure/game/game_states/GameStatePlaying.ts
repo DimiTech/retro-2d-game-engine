@@ -1,3 +1,5 @@
+import * as CONFIG from '@app/configuration/config.json'
+
 import IGameState from './IGameState'
 import GAME_STATES from './GameStates'
 
@@ -11,7 +13,7 @@ import Gamepads from '@app/peripherals/Gamepads'
 
 import Map from '@app/domain/map/Map'
 import Player from '@app/domain/player/Player'
-import Level from '@app/domain/Level'
+import Level, { LevelTimer } from '@app/domain/Level'
 
 export default class GameStatePlaying implements IGameState {
   private player: Player
@@ -50,6 +52,8 @@ export default class GameStatePlaying implements IGameState {
       this.player.update()
       this.map.update()
       this.checkForLevelClearedCondition()
+
+      LevelTimer.incrementTimeSpentOnCurrentLevel()
     } else {
       Level.resetToStartingLevel()
       Game.stateManager.setState(GAME_STATES.GAME_OVER)
@@ -59,6 +63,9 @@ export default class GameStatePlaying implements IGameState {
   public render(): void {
     this.map.draw()
     this.player.draw()
+    if (CONFIG.DEBUG.SHOW_LEVEL_TIME) {
+      LevelTimer.debug_displayTimeSpentOnCurrentLevel()
+    }
   }
 
   private startNewGame(): void {

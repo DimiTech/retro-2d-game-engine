@@ -23,7 +23,7 @@ export default class FrameRate {
     }
   }
 
-  public static drawFPS() {
+  public static debug_drawFPS() {
     context.beginPath()
       context.fillStyle = '#FFC100'
       context.font = '8px Monospace'

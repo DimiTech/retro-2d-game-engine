@@ -78,7 +78,7 @@ export default class Game {
     Canvas.clear()
     Game.stateManager.render()
     if (CONFIG.DEBUG.FPS) {
-      FrameRate.drawFPS()
+      FrameRate.debug_drawFPS()
     }
   }
 }

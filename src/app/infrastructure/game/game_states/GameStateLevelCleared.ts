@@ -8,7 +8,7 @@ import { context } from '@app/infrastructure/Canvas'
 import IGameState from './IGameState'
 import GAME_STATES from './GameStates'
 
-import Level from '@app/domain/Level'
+import Level, { LevelTimer } from '@app/domain/Level'
 
 export default class GameStateLevelCleared implements IGameState {
   public enter(): void {
@@ -40,12 +40,22 @@ export default class GameStateLevelCleared implements IGameState {
 
   private drawLevelClearedStatistics(): void {
     context.beginPath()
+      // Title
       context.fillStyle = '#5555ff'
       context.font = '22px Monospace'
       context.fillText(
         `Level ${Level.currentLevel} Cleared!`,
         CONFIG.CANVAS_WIDTH / 2 - 100,
         (CONFIG.CANVAS_HEIGHT / 2)
+      )
+      
+      // Level Time
+      context.font = '16px Monospace'
+      context.fillStyle = '#9999ff'
+      context.fillText(
+        `Time: ${Math.round(LevelTimer.timeSpentOnCurrentLevel / 1000)} seconds`,
+        CONFIG.CANVAS_WIDTH / 2 - 100,
+        (CONFIG.CANVAS_HEIGHT / 2) + 30
       )
     context.stroke()
   }
