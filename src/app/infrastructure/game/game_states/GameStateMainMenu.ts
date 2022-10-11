@@ -3,14 +3,15 @@ import * as CONFIG from '@app/configuration/config.json'
 import { KEYBOARD_KEYS } from '@app/peripherals/constants/KeyCodes'
 
 import Game from '@app/infrastructure/game/Game'
+import GameTime from '@app/infrastructure/GameTime'
 import { context } from '@app/infrastructure/Canvas'
 
 import IGameState from './IGameState'
 import GAME_STATES from './GameStates'
 
 export default class GameStateMainMenu implements IGameState {
-  private animationCounter: number = 0
-  private animationPosition: number = 100
+  private animationProgress: number = 0
+  private animationLength: number = GameTime.ONE_SECOND
   private instructionsVisible: boolean = true
 
   public enter(): void {
@@ -21,8 +22,8 @@ export default class GameStateMainMenu implements IGameState {
   }
 
   public update(): void {
-    this.animationCounter = (this.animationCounter + 1) % this.animationPosition
-    if (this.animationCounter >= this.animationPosition / 2) {
+    this.animationProgress = (this.animationProgress + GameTime.frameElapsedTime) % this.animationLength
+    if (this.animationProgress >= this.animationLength / 2) {
       this.instructionsVisible = false
     } else {
       this.instructionsVisible = true
