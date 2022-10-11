@@ -25,11 +25,11 @@ export default class ConcreteEnemy extends Enemy {
   constructor(
     x: number,
     y: number,
+    speed: number,
     healthPercentage: number,
     protected pathfindingInterval: number
   ) {
-    super(x, y, new CollisionBox(14, 14), 1, healthPercentage)
-    this.updateMapPosition()
+    super(x, y, new CollisionBox(14, 14), speed, healthPercentage)
   }
 
   public update(player: Player, enemies: Enemy[]): void {
@@ -224,54 +224,7 @@ export default class ConcreteEnemy extends Enemy {
     }
   }
 
-  // TODO: Compose this functionality since it's shared between enemies and player
-  private move(): void {
-    if (this.moving.left && !this.blocked.left) {
-      if (this.moving.up || this.moving.down) {
-        this.x -= this.maxSpeedDiagonal
-      } else {
-        this.x -= this.maxSpeed
-      }
-    }
-    if (this.moving.right && !this.blocked.right) {
-      if (this.moving.up || this.moving.down) {
-        this.x += this.maxSpeedDiagonal
-      } else {
-        this.x += this.maxSpeed
-      }
-    }
-    if (this.moving.up && !this.blocked.up) {
-      if (this.moving.left || this.moving.right) {
-        this.y -= this.maxSpeedDiagonal
-      } else {
-        this.y -= this.maxSpeed
-      }
-    }
-    if (this.moving.down && !this.blocked.down) {
-      if (this.moving.left || this.moving.right) {
-        this.y += this.maxSpeedDiagonal
-      } else {
-        this.y += this.maxSpeed
-      }
-    }
-    this.updateMapPosition()
-  }
-
-  // TODO: Compose this functionality since it's shared between enemies and player
-  private updateMapPosition(): void {
-    this.row = Math.floor(this.y / CONFIG.TILE_SIZE)
-    this.col = Math.floor(this.x / CONFIG.TILE_SIZE)
-  }
-
-  // TODO: Compose this functionality since it's shared between enemies and player
-  private updateTileDeltas(): void {
-    this.deltas.dyTop = this.y % CONFIG.TILE_SIZE
-    this.deltas.dyBottom = CONFIG.TILE_SIZE - this.deltas.dyTop
-    this.deltas.dxLeft = this.x % CONFIG.TILE_SIZE
-    this.deltas.dxRight = CONFIG.TILE_SIZE - this.deltas.dxLeft
-  }
-
-  // TODO: Compose this functionality since it's shared between enemies and player
+  // TODO: Move to Creature since it's shared between enemies and player
   private debug_drawCollisionBox(player: Player) {
     context.strokeStyle = this.getHealthColor()
     context.lineWidth = 0.2

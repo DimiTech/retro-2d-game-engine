@@ -25,20 +25,15 @@ export default abstract class Enemy extends Creature {
   protected attackCooldown: number
 
   constructor(
-    public x: number,
-    public y: number,
+    x: number,
+    y: number,
     collisionBox: CollisionBox,
-    maxSpeed: number,
+    speed: number,
     healthPercentage: number,
   ) {
-    super()
-    this.initializeHealth(healthPercentage)
+    super(x, y, collisionBox, speed, healthPercentage)
 
-    this.maxSpeed = maxSpeed
-    this.maxSpeedDiagonal = Math.round(Math.sin(45) * this.maxSpeed)
-
-    this.collisionBox = collisionBox
-
+    // TODO: Move this as well
     this.attackCooldown = this.attackSpeed // TODO: Extract to initializeAttackParameters() or somehting...
   }
 

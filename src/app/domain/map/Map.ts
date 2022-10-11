@@ -127,7 +127,7 @@ export default class Map {
 
   private loadEnemies(map: IMap) {
     map.enemies.forEach((e, i) => {
-      Map.enemies.push(new ConcreteEnemy(e.x, e.y, e.healthPercentage, i))
+      Map.enemies.push(new ConcreteEnemy(e.x, e.y, 0.2, e.healthPercentage, i))
     })
   }
 }

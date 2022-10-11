@@ -25,15 +25,7 @@ export default class Player extends Creature {
   private projectiles: Projectile[] = []
 
   constructor(public x: number, public y: number) {
-    super()
-    this.initializeHealth()
-
-    this.maxSpeed = 2
-    this.maxSpeedDiagonal = Math.round(Math.sin(45) * this.maxSpeed) // TODO: Extract function
-
-    this.collisionBox = new CollisionBox(12, 12)
-
-    this.updateMapPosition()
+    super(x, y, new CollisionBox(12, 12), 0.2, 1)
   }
 
   public update(): void {
@@ -154,37 +146,6 @@ export default class Player extends Creature {
     }
   }
 
-  private move(): void {
-    if (this.moving.left && !this.blocked.left) {
-      if (this.moving.up || this.moving.down) {
-        this.x -= this.maxSpeedDiagonal
-      } else {
-        this.x -= this.maxSpeed
-      }
-    }
-    if (this.moving.right && !this.blocked.right) {
-      if (this.moving.up || this.moving.down) {
-        this.x += this.maxSpeedDiagonal
-      } else {
-        this.x += this.maxSpeed
-      }
-    }
-    if (this.moving.up && !this.blocked.up) {
-      if (this.moving.left || this.moving.right) {
-        this.y -= this.maxSpeedDiagonal
-      } else {
-        this.y -= this.maxSpeed
-      }
-    }
-    if (this.moving.down && !this.blocked.down) {
-      if (this.moving.left || this.moving.right) {
-        this.y += this.maxSpeedDiagonal
-      } else {
-        this.y += this.maxSpeed
-      }
-    }
-  }
-
   private calculateTheta(): number {
     const theta = angleBetweenPoints(Canvas.mousePosition, Canvas.center)
     context.fillStyle = '#44FF44'
@@ -257,19 +218,6 @@ export default class Player extends Creature {
 
   private drawProjectiles() {
     this.projectiles.forEach((p) => p.draw(this.x, this.y))
-  }
-
-  // TODO: Not DRY... generalize this functionality
-  private updateMapPosition(): void {
-    this.row = Math.floor(this.y / CONFIG.TILE_SIZE)
-    this.col = Math.floor(this.x / CONFIG.TILE_SIZE)
-  }
-
-  private updateTileDeltas(): void {
-    this.deltas.dyTop = this.y % CONFIG.TILE_SIZE
-    this.deltas.dyBottom = CONFIG.TILE_SIZE - this.deltas.dyTop
-    this.deltas.dxLeft = this.x % CONFIG.TILE_SIZE
-    this.deltas.dxRight = CONFIG.TILE_SIZE - this.deltas.dxLeft
   }
 
   private checkForCollisionWithEnemies(): void { // TODO: Extract to Creature?

@@ -1,5 +1,6 @@
 import * as CONFIG from '@app/configuration/config.json'
 
+import GameTime from '@app/infrastructure/GameTime'
 import CollisionBox, { collisionBoxesIntersect, ICollidable } from '@app/infrastructure/CollisionBox'
 
 import CreatureState from '@app/domain/CreatureState'
@@ -9,8 +10,6 @@ import { Directions } from '@app/infrastructure/Directions'
 export default abstract class Creature {
   public prevX: number[] = [] // TODO: Make private?
   public prevY: number[] = [] // TODO: Make private?
-  public x: number
-  public y: number
   public nextX: number
   public nextY: number
   public row: number
@@ -18,8 +17,8 @@ export default abstract class Creature {
   public maxHealth = 100
   public health: number
 
-  public maxSpeed: number
-  public maxSpeedDiagonal: number
+  public maxSpeed: number         // Derived from this.speed
+  public maxSpeedDiagonal: number // Derived from this.speed
 
   public state: CreatureState = CreatureState.Idling
   public previousState: CreatureState = CreatureState.Idling // TODO: Use `previousState` for something? (Currently it's unused)
@@ -45,7 +44,20 @@ export default abstract class Creature {
     dxLeft   : 0,
     dxRight  : 0,
   }
-  public collisionBox: CollisionBox
+  
+  constructor(
+    public x: number,
+    public y: number,
+    public collisionBox: CollisionBox,
+    private speed: number,
+    healthPercentage: number,
+  ) {
+    this.maxSpeed = this.speed
+    this.maxSpeedDiagonal = Math.sin(45) * this.maxSpeed
+
+    this.initializeHealth(healthPercentage)
+    this.updateMapPosition()
+  }
 
   protected resetMoving(): void {
     this.moving.left  = false
@@ -93,6 +105,50 @@ export default abstract class Creature {
         this.nextY += this.maxSpeed
       }
     }
+  }
+
+  protected move(): void {
+    if (this.moving.left && !this.blocked.left) {
+      if (this.moving.up || this.moving.down) {
+        this.x -= Math.round(GameTime.elapsedTimeFactor * this.maxSpeedDiagonal)
+      } else {
+        this.x -= Math.round(GameTime.elapsedTimeFactor * this.maxSpeed)
+      }
+    }
+    if (this.moving.right && !this.blocked.right) {
+      if (this.moving.up || this.moving.down) {
+        this.x += Math.round(GameTime.elapsedTimeFactor * this.maxSpeedDiagonal)
+      } else {
+        this.x += Math.round(GameTime.elapsedTimeFactor * this.maxSpeed)
+      }
+    }
+    if (this.moving.up && !this.blocked.up) {
+      if (this.moving.left || this.moving.right) {
+        this.y -= Math.round(GameTime.elapsedTimeFactor * this.maxSpeedDiagonal)
+      } else {
+        this.y -= Math.round(GameTime.elapsedTimeFactor * this.maxSpeed)
+      }
+    }
+    if (this.moving.down && !this.blocked.down) {
+      if (this.moving.left || this.moving.right) {
+        this.y += Math.round(GameTime.elapsedTimeFactor * this.maxSpeedDiagonal)
+      } else {
+        this.y += Math.round(GameTime.elapsedTimeFactor * this.maxSpeed)
+      }
+    }
+    this.updateMapPosition()
+  }
+
+  protected updateMapPosition(): void {
+    this.row = Math.floor(this.y / CONFIG.TILE_SIZE)
+    this.col = Math.floor(this.x / CONFIG.TILE_SIZE)
+  }
+
+  protected updateTileDeltas(): void {
+    this.deltas.dyTop = this.y % CONFIG.TILE_SIZE
+    this.deltas.dyBottom = CONFIG.TILE_SIZE - this.deltas.dyTop
+    this.deltas.dxLeft = this.x % CONFIG.TILE_SIZE
+    this.deltas.dxRight = CONFIG.TILE_SIZE - this.deltas.dxLeft
   }
 
   protected checkIfBlockedByCreature(c: Creature, nextCreatureState: ICollidable) {
