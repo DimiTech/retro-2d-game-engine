@@ -35,8 +35,11 @@ export default class ConcreteEnemy extends Enemy {
     y: number,
     speed: number,
     healthPercentage: number,
+    pathfindingTimerStart: number
   ) {
     super(x, y, new CollisionBox(14, 14), speed, healthPercentage)
+
+    this.pathfindingTimer = (9 * pathfindingTimerStart) % this.pathfindingInterval
   }
 
   // TODO: See what more can be moved to `Enemy.update()`
@@ -159,7 +162,7 @@ export default class ConcreteEnemy extends Enemy {
   private findPathToPlayer(player: Player, thereAreObstaclesBetweenPlayerAndThisEnemy: boolean) {
     if (thereAreObstaclesBetweenPlayerAndThisEnemy) { // TODO: || this.isStuck()
       if (this.pathfindingTimer === 0) {
-        this.pathfindingNodes = generatePathNodes(
+        this.pathfindingNodes = generatePathNodes( // TODO: Move to Pathfinding or Player
           Math.round(Math.abs(player.row + this.row) / 2),
           Math.round(Math.abs(player.col + this.col) / 2),
           this.collisionBox,
