@@ -6,11 +6,12 @@ import { PathNode } from '@app/infrastructure/Pathfinding'
 import CreatureSprite from '@app/graphics/sprites/CreatureSprite'
 
 import Creature from '@app/domain/Creature'
+import CreatureState from '@app/domain/CreatureState'
 import Player from '@app/domain/player/Player'
+import Map from '@app/domain//map/Map'
+import DamageNumbers, { DamageNumberFactory } from '@app/domain/widgets/DamageNumbers'
 
 import SoundFX from '@app/audio/SoundFX'
-
-import Map from '../map/Map'
 
 export default abstract class Enemy extends Creature {
   protected stuck: boolean // TODO: Use stuck for something?
@@ -26,7 +27,12 @@ export default abstract class Enemy extends Creature {
 
   // TODO: Move this to Weapon
   protected readonly attackSpeed: number // seconds
-  protected attackCooldown: number       // milliseconds
+  protected attackCooldown: number       // ms
+
+  protected animationLengthAttack   : number // ms
+  protected animationProgressAttack : number // ms
+  protected animationLengthMove     : number // ms
+  protected animationProgressMove   : number // ms
 
   constructor(
     x: number,
@@ -39,10 +45,18 @@ export default abstract class Enemy extends Creature {
 
     // TODO: Move this function to Weapon
     this.resetAttackCooldown()
+
+    // Widgets
+    this.widgets.damageNumbers = new DamageNumbers()
   }
 
-  public abstract draw(player: Player): void
-  public abstract update(player: Player, enemies: Enemy[]): void
+  public draw(player: Player): void {
+    Object.values(this.widgets).forEach(widget => widget.render(player.x, player.y)) // Render widgets
+  }
+
+  public update(player: Player): void {
+    Object.values(this.widgets).forEach(widget => widget.update()) // Update widgets
+  }
 
   public isOnScreen(playerX: number, playerY: number): boolean {
     const offScreenOffset = CONFIG.TILE_SIZE * 2
@@ -52,7 +66,6 @@ export default abstract class Enemy extends Creature {
     )
   }
 
-  public abstract takeDamage(damageAmount: number): void
   protected abstract advanceAnimation(): void
 
   protected checkForCollisionWithPlayer(player: Player): void {
@@ -109,6 +122,25 @@ export default abstract class Enemy extends Creature {
     this.attackCooldown = (1000 * this.attackSpeed) / CONFIG.GAME_SPEED
   }
 
+  public takeDamage(damageAmount: number): void {
+    SoundFX.playEnemyHit()
+
+    this.health -= damageAmount
+
+    this.widgets.damageNumbers.push(DamageNumberFactory.create(this.x, this.y, this.collisionBox, damageAmount))
+
+    if (this.health <= 0) {
+      this.die()
+    } else {
+      SoundFX.playEnemyHit()
+    }
+  }
+
+  public die() {
+    SoundFX.playEnemyDeath()
+    this.setState(CreatureState.Decaying)
+  }
+
   protected dealDamage(p: Player) {
     p.takeDamage(this.getDamage())
   }
@@ -116,5 +148,18 @@ export default abstract class Enemy extends Creature {
   // TODO: Implement damage range
   protected getDamage() {
     return 10
+  }
+
+  public setState(newState: CreatureState) {
+    this.previousState = this.state
+    this.state = newState
+    this.resetAnimation()
+  }
+
+  // Move to Animation objects
+  protected resetAnimation() {
+    this.animationSpritePosition = 0
+    this.animationProgressAttack = 0
+    this.animationProgressMove = 0
   }
 }

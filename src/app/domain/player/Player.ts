@@ -15,6 +15,8 @@ import Map from '@app/domain/map/Map'
 import Crosshair from './Crosshair'
 import Projectile from './Projectile'
 
+import DamageNumbers, { DamageNumberColors, DamageNumberFactory } from '@app/domain/widgets/DamageNumbers'
+
 import SoundFX from '@app/audio/SoundFX'
 
 export default class Player extends Creature {
@@ -31,6 +33,11 @@ export default class Player extends Creature {
 
   constructor(public x: number, public y: number) {
     super(x, y, new CollisionBox(12, 12), 0.18, 1)
+
+    // Widgets
+    if (CONFIG.FEATURES.DAMAGE_NUMBERS_ON_PLAYER) {
+      this.widgets.damageNumbers = new DamageNumbers() // TODO: Move to Creature?
+    }
   }
 
   public update(): void {
@@ -49,6 +56,7 @@ export default class Player extends Creature {
         this.projectiles.splice(i, 1) // Remove the projectile
       }
     })
+    Object.values(this.widgets).forEach(widget => widget.update()) // Update widgets
   }
 
   public draw(): void {
@@ -153,6 +161,11 @@ export default class Player extends Creature {
 
   public takeDamage(damageAmount: number): void {
     this.health = this.health - damageAmount
+
+    if (this.widgets.damageNumbers) {
+      this.widgets.damageNumbers.push(DamageNumberFactory.create(this.x, this.y, this.collisionBox, damageAmount, DamageNumberColors.gray))
+    }
+
     if (this.health <= 0) {
       this.die()
     }
@@ -185,6 +198,8 @@ export default class Player extends Creature {
     if (CONFIG.DEBUG.PLAYER_COLLISION_BOX) {
       this.debug_drawCollisionBox()
     }
+
+    Object.values(this.widgets).forEach(widget => widget.render(this.x, this.y)) // Render widgets
   }
 
   private debug_drawCollisionBox() {

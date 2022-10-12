@@ -14,6 +14,7 @@ import { generatePathNodes, findShortestPath, debug_drawPathNodes, drawNode } fr
 import CreatureState from '@app/domain/CreatureState'
 import Player from '@app/domain/player/Player'
 import Enemy from '@app/domain/enemies/Enemy'
+
 import CreatureSprite from '@app/graphics/sprites/CreatureSprite'
 import Sprites from '@app/graphics/Sprites'
 
@@ -24,10 +25,10 @@ export default class ConcreteEnemy extends Enemy {
   // TODO: Extract to CreatureState objects
   // TODO: Adjust the feeling of enemy attack & animation
   protected attackSpeed = 0.45 // seconds
-  private animationLengthAttack   = 420 // ms
-  private animationProgressAttack = 0   // ms
-  private animationLengthMove   = 330 // ms
-  private animationProgressMove = 0   // ms
+  protected animationLengthAttack   = 420 // ms
+  protected animationProgressAttack = 0   // ms
+  protected animationLengthMove     = 330 // ms
+  protected animationProgressMove   = 0   // ms
 
   constructor(
     x: number,
@@ -38,7 +39,8 @@ export default class ConcreteEnemy extends Enemy {
     super(x, y, new CollisionBox(14, 14), speed, healthPercentage)
   }
 
-  public update(player: Player, enemies: Enemy[]): void {
+  // TODO: See what more can be moved to `Enemy.update()`
+  public update(player: Player): void {
     if (this.state === CreatureState.Dying) {
       return
     }
@@ -112,11 +114,14 @@ export default class ConcreteEnemy extends Enemy {
     this.updateDirection() // TODO: This is based on movement, which is incorrect - fix it
     this.updateTileDeltas()
 
+    super.update(player)
+
     if (Game.stateManager.getState() === GAME_STATES.PLAYING) {
       this.advanceAnimation()
     }
   }
 
+  // TODO: See what more can be moved to `Enemy.draw()`
   public draw(player: Player): void {
     if (CONFIG.DEBUG.ENEMY_COLLISION_BOX) {
       this.debug_drawCollisionBox(player)
@@ -135,21 +140,8 @@ export default class ConcreteEnemy extends Enemy {
       this.debug_drawShortestPathToPlayer(player)
     }
     this.sprite.draw(this, { x: player.x, y: player.y })
-  }
 
-  public takeDamage(damageAmount: number): void {
-    SoundFX.playEnemyHit()
-    this.health -= damageAmount
-    if (this.health <= 0) {
-      this.die()
-    } else {
-      SoundFX.playEnemyHit()
-    }
-  }
-
-  public die() {
-    SoundFX.playEnemyDeath()
-    this.setState(CreatureState.Decaying)
+    super.draw(player)
   }
 
   protected advanceAnimation(): void {
@@ -296,18 +288,5 @@ export default class ConcreteEnemy extends Enemy {
       context.moveTo(Canvas.center.x + (p2.x - player.x), Canvas.center.y + (p2.y - player.y))
       context.lineTo(Canvas.center.x + (p1.x - player.x), Canvas.center.y + (p1.y - player.y))
     context.stroke()
-  }
-
-  // Move to Animation objects
-  protected resetAnimation() {
-    this.animationSpritePosition = 0
-    this.animationProgressAttack = 0
-    this.animationProgressMove = 0
-  }
-
-  public setState(newState: CreatureState) {
-    this.previousState = this.state
-    this.state = newState
-    this.resetAnimation()
   }
 }

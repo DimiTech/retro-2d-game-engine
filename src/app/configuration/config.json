@@ -17,7 +17,9 @@
     "ENEMY_STATE": true
   },
   "FEATURES": {
-    "SCATTER_PROJECTILES": true
+    "SCATTER_PROJECTILES": true,
+    "DAMAGE_NUMBERS_SHOW": true,
+    "DAMAGE_NUMBERS_ON_PLAYER": true
   },
   "THROW_DEVELOPMENT_ERRORS": true
 }

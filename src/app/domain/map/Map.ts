@@ -44,7 +44,7 @@ export default class Map {
 
   public update(): void {
     Map.enemies.forEach((e, i) => {
-      e.update(this.player, Map.enemies)
+      e.update(this.player)
       if (e.state === CreatureState.Decaying) {
         Map.enemies.splice(i, 1) // Remove the enemy
         this.openPortalWhenAllEnemiesAreKilled()

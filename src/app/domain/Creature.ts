@@ -2,10 +2,11 @@ import * as CONFIG from '@app/configuration/config.json'
 
 import GameTime from '@app/infrastructure/GameTime'
 import CollisionBox, { collisionBoxesIntersect, ICollidable } from '@app/infrastructure/CollisionBox'
-
-import CreatureState from '@app/domain/CreatureState'
-import Map from '@app/domain/map/Map'
 import { Directions } from '@app/infrastructure/Directions'
+
+import Map from '@app/domain/map/Map'
+import CreatureState from '@app/domain/CreatureState'
+import { Widget } from '@app/domain/widgets/DamageNumbers'
 
 export default abstract class Creature {
   public prevX: number[] = [] // TODO: Make private?
@@ -44,6 +45,8 @@ export default abstract class Creature {
     dxLeft   : 0,
     dxRight  : 0,
   }
+
+  protected widgets: { [key: string]: Widget } = {}
   
   constructor(
     public x: number,
