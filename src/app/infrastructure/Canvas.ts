@@ -10,6 +10,8 @@ canvas.style.width  = CONFIG.SCALE !== 1 ? (CONFIG.SCALE * CONFIG.CANVAS_WIDTH )
 canvas.style.height = CONFIG.SCALE !== 1 ? (CONFIG.SCALE * CONFIG.CANVAS_HEIGHT) + 'px' : 'auto'
 export const context = canvas.getContext('2d')
 
+context.imageSmoothingEnabled = false // Disables anti-aliasing on Chrome
+
 export default class Canvas {
   public static halfWidth  = canvas.width  / 2
   public static halfHeight = canvas.height / 2
