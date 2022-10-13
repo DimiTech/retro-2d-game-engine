@@ -170,7 +170,7 @@ export default class ConcreteEnemy extends Enemy {
         this.shortestPath = findShortestPath(this, player, this.pathfindingNodes)
       }
 
-      this.pathfindingTimer += GameTime.elapsedTimeFactor
+      this.pathfindingTimer += GameTime.frameElapsedTime // Game speed independent
       if (this.pathfindingTimer > this.pathfindingInterval) {
         this.pathfindingTimer = 0
       }
