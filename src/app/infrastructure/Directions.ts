@@ -8,3 +8,10 @@ export enum Directions {
   W  = 'W',
   NW = 'NW',
 }
+
+export enum MovingDirections {
+  up    = 'up',
+  right = 'right',
+  down  = 'down',
+  left  = 'left',
+}

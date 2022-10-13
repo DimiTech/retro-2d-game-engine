@@ -2,7 +2,7 @@ import * as CONFIG from '@app/configuration/config.json'
 
 import GameTime from '@app/infrastructure/GameTime'
 import CollisionBox, { collisionBoxesIntersect, ICollidable } from '@app/infrastructure/CollisionBox'
-import { Directions } from '@app/infrastructure/Directions'
+import { Directions, MovingDirections } from '@app/infrastructure/Directions'
 
 import Map from '@app/domain/map/Map'
 import CreatureState from '@app/domain/CreatureState'
@@ -27,13 +27,13 @@ export default abstract class Creature {
   public animationSpritePosition: number = 0
 
   public direction: Directions
-  public moving = {
+  public moving: { [key in MovingDirections]: boolean } = {
     left  : false,
     right : false,
     up    : false,
     down  : false,
   }
-  public blocked = {
+  public blocked: { [key in MovingDirections]: boolean } = {
     left  : false,
     right : false,
     up    : false,
