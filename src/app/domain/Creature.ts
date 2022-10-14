@@ -351,8 +351,16 @@ export default abstract class Creature {
   }
 
   protected checkIfMoving(): boolean {
-    const xUnchanged = this.prevX[this.prevX.length - 1] === this.prevX[this.prevX.length - 2]
-    const yUnchanged = this.prevY[this.prevY.length - 1] === this.prevY[this.prevY.length - 2]
+    const xUnchanged =
+      this.prevX[0] === this.prevX[this.prevX.length - 4] &&
+      this.prevX[0] === this.prevX[this.prevX.length - 3] &&
+      this.prevX[0] === this.prevX[this.prevX.length - 2] &&
+      this.prevX[0] === this.prevX[this.prevX.length - 1]
+    const yUnchanged =
+      this.prevY[0] === this.prevY[this.prevY.length - 4] &&
+      this.prevY[0] === this.prevY[this.prevY.length - 3] &&
+      this.prevY[0] === this.prevY[this.prevY.length - 2] &&
+      this.prevY[0] === this.prevY[this.prevY.length - 1]
     if (xUnchanged && yUnchanged) {
       return false
     } else {
