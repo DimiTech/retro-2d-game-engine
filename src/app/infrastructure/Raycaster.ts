@@ -9,6 +9,7 @@ import RaycastablePoint from './geometry/RaycastablePoint'
 import Enemy from '@app/domain/enemies/Enemy'
 import { PathNode } from './Pathfinding'
 import Player from '@app/domain/player/Player'
+import { Pi2Decimals } from './math/MathUtils'
 
 export default class Raycaster {
   /**
@@ -93,7 +94,7 @@ export default class Raycaster {
       return false
     }
 
-    else if (angleBetweenNodes > 0 && angleBetweenNodes < Math.PI / 2) { // between 0deg and 90deg
+    else if (angleBetweenNodes > 0 && angleBetweenNodes < Pi2Decimals / 2) { // between 0deg and 90deg
       const [vNE1, vNE2] = getVerticesNE(n1, n2)
       if (Raycaster.determineIfThereAreObstaclesBetweenTwoPoints(vNE1 as RaycastablePoint, vNE2 as RaycastablePoint)) {
         return true
@@ -105,7 +106,7 @@ export default class Raycaster {
       return false
     }
 
-    else if (angleBetweenNodes === (Math.PI / 2)) { // 90deg
+    else if (angleBetweenNodes === (Pi2Decimals / 2)) { // 90deg
       const [vSE1, vSE2] = getVerticesSE(n1, n2)
       if (Raycaster.determineIfThereAreObstaclesBetweenTwoPoints(vSE1 as RaycastablePoint, vSE2 as RaycastablePoint)) {
         return true
@@ -117,7 +118,7 @@ export default class Raycaster {
       return false
     }
 
-    else if (angleBetweenNodes > Math.PI / 2 && angleBetweenNodes < Math.PI) { // between 90deg and 180deg
+    else if (angleBetweenNodes > Pi2Decimals / 2 && angleBetweenNodes < Pi2Decimals) { // between 90deg and 180deg
       const [vNW1, vNW2] = getVerticesNW(n1, n2)
       if (Raycaster.determineIfThereAreObstaclesBetweenTwoPoints(vNW1 as RaycastablePoint, vNW2 as RaycastablePoint)) {
         return true
@@ -129,7 +130,7 @@ export default class Raycaster {
       return false
     }
 
-    else if (Math.abs(angleBetweenNodes) === 3.14) { // 180deg
+    else if (Math.abs(angleBetweenNodes) === Pi2Decimals) { // 180deg
       const [vNW1, vNW2] = getVerticesNW(n1, n2)
       if (Raycaster.determineIfThereAreObstaclesBetweenTwoPoints(vNW1 as RaycastablePoint, vNW2 as RaycastablePoint)) {
         return true
@@ -141,7 +142,7 @@ export default class Raycaster {
       return false
     }
 
-    else if (angleBetweenNodes > -Math.PI && angleBetweenNodes < -Math.PI / 2) { // between 180deg and 270deg
+    else if (angleBetweenNodes > -Pi2Decimals && angleBetweenNodes < -Pi2Decimals / 2) { // between 180deg and 270deg
       const [vNE1, vNE2] = getVerticesNE(n1, n2)
       if (Raycaster.determineIfThereAreObstaclesBetweenTwoPoints(vNE1 as RaycastablePoint, vNE2 as RaycastablePoint)) {
         return true
@@ -153,7 +154,7 @@ export default class Raycaster {
       return false
     }
 
-    else if (angleBetweenNodes === -1.57) { // 270deg
+    else if (angleBetweenNodes === -Pi2Decimals / 2) { // 270deg
       const [vNE1, vNE2] = getVerticesNE(n1, n2)
       if (Raycaster.determineIfThereAreObstaclesBetweenTwoPoints(vNE1 as RaycastablePoint, vNE2 as RaycastablePoint)) {
         return true
@@ -165,7 +166,7 @@ export default class Raycaster {
       return false
     }
 
-    else if (angleBetweenNodes > -Math.PI / 2 && angleBetweenNodes < 0) { // between 270deg and 360deg
+    else if (angleBetweenNodes > -Pi2Decimals / 2 && angleBetweenNodes < 0) { // between 270deg and 360deg
       const [vNW1, vNW2] = getVerticesNW(n1, n2)
       if (Raycaster.determineIfThereAreObstaclesBetweenTwoPoints(vNW1 as RaycastablePoint, vNW2 as RaycastablePoint)) {
         return true
