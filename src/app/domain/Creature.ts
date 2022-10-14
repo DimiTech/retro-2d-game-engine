@@ -56,7 +56,7 @@ export default abstract class Creature {
     healthPercentage: number,
   ) {
     this.maxSpeed = this.speed
-    this.maxSpeedDiagonal = Math.sin(45) * this.maxSpeed
+    this.maxSpeedDiagonal = Math.sin(45) * this.speed
 
     this.initializeHealth(healthPercentage)
     this.updateMapPosition()
@@ -81,65 +81,56 @@ export default abstract class Creature {
     this.nextY = this.y
 
     if (this.moving.left) {
-      if (this.moving.up || this.moving.down) {
-        this.nextX -= this.maxSpeedDiagonal
-      } else {
-        this.nextX -= this.maxSpeed
-      }
+      const isDiagonalMovement = (this.moving.up || this.moving.down)
+      this.nextX -= this.calculateMovementAmountPixels(isDiagonalMovement)
     }
     if (this.moving.right) {
-      if (this.moving.up || this.moving.down) {
-        this.nextX += this.maxSpeedDiagonal
-      } else {
-        this.nextX += this.maxSpeed
-      }
+      const isDiagonalMovement = (this.moving.up || this.moving.down)
+      this.nextX += this.calculateMovementAmountPixels(isDiagonalMovement)
     }
     if (this.moving.up) {
-      if (this.moving.left || this.moving.right) {
-        this.nextY -= this.maxSpeedDiagonal
-      } else {
-        this.nextY -= this.maxSpeed
-      }
+      const isDiagonalMovement = (this.moving.left || this.moving.right)
+      this.nextY -= this.calculateMovementAmountPixels(isDiagonalMovement)
     }
     if (this.moving.down) {
-      if (this.moving.left || this.moving.right) {
-        this.nextY += this.maxSpeedDiagonal
-      } else {
-        this.nextY += this.maxSpeed
-      }
+      const isDiagonalMovement = (this.moving.left || this.moving.right)
+      this.nextY += this.calculateMovementAmountPixels(isDiagonalMovement)
     }
   }
 
   protected move(): void {
     if (this.moving.left && !this.blocked.left) {
-      if (this.moving.up || this.moving.down) {
-        this.x -= Math.round(GameTime.elapsedTimeFactor * this.maxSpeedDiagonal)
-      } else {
-        this.x -= Math.round(GameTime.elapsedTimeFactor * this.maxSpeed)
-      }
+      const isDiagonalMovement = (this.moving.up || this.moving.down)
+      this.x -= this.calculateMovementAmountPixels(isDiagonalMovement)
     }
     if (this.moving.right && !this.blocked.right) {
-      if (this.moving.up || this.moving.down) {
-        this.x += Math.round(GameTime.elapsedTimeFactor * this.maxSpeedDiagonal)
-      } else {
-        this.x += Math.round(GameTime.elapsedTimeFactor * this.maxSpeed)
-      }
+      const isDiagonalMovement = (this.moving.up || this.moving.down)
+      this.x += this.calculateMovementAmountPixels(isDiagonalMovement)
     }
     if (this.moving.up && !this.blocked.up) {
-      if (this.moving.left || this.moving.right) {
-        this.y -= Math.round(GameTime.elapsedTimeFactor * this.maxSpeedDiagonal)
-      } else {
-        this.y -= Math.round(GameTime.elapsedTimeFactor * this.maxSpeed)
-      }
+      const isDiagonalMovement = (this.moving.left || this.moving.right)
+      this.y -= this.calculateMovementAmountPixels(isDiagonalMovement)
     }
     if (this.moving.down && !this.blocked.down) {
-      if (this.moving.left || this.moving.right) {
-        this.y += Math.round(GameTime.elapsedTimeFactor * this.maxSpeedDiagonal)
-      } else {
-        this.y += Math.round(GameTime.elapsedTimeFactor * this.maxSpeed)
-      }
+      const isDiagonalMovement = (this.moving.left || this.moving.right)
+      this.y += this.calculateMovementAmountPixels(isDiagonalMovement)
     }
     this.updateMapPosition()
+  }
+
+  /**
+   * For this Game Engine we want pixelated movement, meaning that the movement amounts are Integer values
+   * 
+   * @param direction  - One of four possible `MovingDirections`
+   * @param isDiagonalMovement - Specifies whether the movement is diagonal or not
+   * @returns - Integer number of pixels to move
+   */
+  private calculateMovementAmountPixels(isDiagonalMovement: boolean): number {
+    const movementAmount = isDiagonalMovement
+      ? GameTime.elapsedTimeFactor * this.maxSpeedDiagonal
+      : GameTime.elapsedTimeFactor * this.maxSpeed        
+    const movementAmountPixels = Math.round(movementAmount)
+    return movementAmountPixels
   }
 
   protected updateMapPosition(): void {
