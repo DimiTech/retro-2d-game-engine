@@ -239,11 +239,26 @@ export default class ConcreteEnemy extends Enemy {
     context.beginPath()
       // Since this is just for debugging purposes, there is no need to
       // optimize/cache the vertex calculations.
-      context.moveTo( 0.5 + Canvas.center.x + (this.x - player.x) - this.collisionBox.halfWidth,  0.5 + Canvas.center.y + (this.y - player.y) - this.collisionBox.halfHeight)
-      context.lineTo(-0.5 + Canvas.center.x + (this.x - player.x) + this.collisionBox.halfWidth,  0.5 + Canvas.center.y + (this.y - player.y) - this.collisionBox.halfHeight)
-      context.lineTo(-0.5 + Canvas.center.x + (this.x - player.x) + this.collisionBox.halfWidth, -0.5 + Canvas.center.y + (this.y - player.y) + this.collisionBox.halfHeight)
-      context.lineTo( 0.5 + Canvas.center.x + (this.x - player.x) - this.collisionBox.halfWidth, -0.5 + Canvas.center.y + (this.y - player.y) + this.collisionBox.halfHeight)
-      context.lineTo( 0.5 + Canvas.center.x + (this.x - player.x) - this.collisionBox.halfWidth,  0.5 + Canvas.center.y + (this.y - player.y) - this.collisionBox.halfHeight)
+      context.moveTo(
+        -0.5 + Canvas.center.x + (this.x - player.x) - this.collisionBox.halfWidth,
+        -0.5 + Canvas.center.y + (this.y - player.y) - this.collisionBox.halfHeight,
+      )
+      context.lineTo(
+         0.5 + Canvas.center.x + (this.x - player.x) + this.collisionBox.halfWidth,
+        -0.5 + Canvas.center.y + (this.y - player.y) - this.collisionBox.halfHeight,
+      )
+      context.lineTo(
+        0.5 + Canvas.center.x + (this.x - player.x) + this.collisionBox.halfWidth,
+        0.5 + Canvas.center.y + (this.y - player.y) + this.collisionBox.halfHeight,
+      )
+      context.lineTo(
+        -0.5 + Canvas.center.x + (this.x - player.x) - this.collisionBox.halfWidth,
+         0.5 + Canvas.center.y + (this.y - player.y) + this.collisionBox.halfHeight,
+      )
+      context.lineTo(
+        -0.5 + Canvas.center.x + (this.x - player.x) - this.collisionBox.halfWidth,
+        -0.5 + Canvas.center.y + (this.y - player.y) - this.collisionBox.halfHeight,
+      )
     context.stroke()
   }
 

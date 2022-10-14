@@ -214,7 +214,7 @@ export default class Player extends Creature {
       -0.5 + Canvas.center.y - this.collisionBox.halfHeight,
     )
     context.lineTo(
-      0.5 + Canvas.center.x + this.collisionBox.halfWidth,
+       0.5 + Canvas.center.x + this.collisionBox.halfWidth,
       -0.5 + Canvas.center.y - this.collisionBox.halfHeight,
     )
     context.lineTo(
@@ -223,7 +223,7 @@ export default class Player extends Creature {
     )
     context.lineTo(
       -0.5 + Canvas.center.x - this.collisionBox.halfWidth,
-      0.5 + Canvas.center.y + this.collisionBox.halfHeight,
+       0.5 + Canvas.center.y + this.collisionBox.halfHeight,
     )
     context.lineTo(
       -0.5 + Canvas.center.x - this.collisionBox.halfWidth,
