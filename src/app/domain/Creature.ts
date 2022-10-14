@@ -76,60 +76,88 @@ export default abstract class Creature {
     this.blocked.right = false
   }
 
+  // TODO: This is not 100% correct, it's just an estimation based on previous frame's length
   protected calculateNextCoordinates(): void {
     this.nextX = this.x
     this.nextY = this.y
 
     if (this.moving.left) {
       const isDiagonalMovement = (this.moving.up || this.moving.down)
-      this.nextX -= this.calculateMovementAmountPixels(isDiagonalMovement)
+      this.nextX -= this.calculateMovementAmountPixels(MovingDirections.left, isDiagonalMovement, false)
     }
     if (this.moving.right) {
       const isDiagonalMovement = (this.moving.up || this.moving.down)
-      this.nextX += this.calculateMovementAmountPixels(isDiagonalMovement)
+      this.nextX += this.calculateMovementAmountPixels(MovingDirections.right, isDiagonalMovement, false)
     }
     if (this.moving.up) {
       const isDiagonalMovement = (this.moving.left || this.moving.right)
-      this.nextY -= this.calculateMovementAmountPixels(isDiagonalMovement)
+      this.nextY -= this.calculateMovementAmountPixels(MovingDirections.up, isDiagonalMovement, false)
     }
     if (this.moving.down) {
       const isDiagonalMovement = (this.moving.left || this.moving.right)
-      this.nextY += this.calculateMovementAmountPixels(isDiagonalMovement)
+      this.nextY += this.calculateMovementAmountPixels(MovingDirections.down, isDiagonalMovement, false)
     }
   }
 
   protected move(): void {
     if (this.moving.left && !this.blocked.left) {
       const isDiagonalMovement = (this.moving.up || this.moving.down)
-      this.x -= this.calculateMovementAmountPixels(isDiagonalMovement)
+      this.x -= this.calculateMovementAmountPixels(MovingDirections.left, isDiagonalMovement)
     }
     if (this.moving.right && !this.blocked.right) {
       const isDiagonalMovement = (this.moving.up || this.moving.down)
-      this.x += this.calculateMovementAmountPixels(isDiagonalMovement)
+      this.x += this.calculateMovementAmountPixels(MovingDirections.right, isDiagonalMovement)
     }
     if (this.moving.up && !this.blocked.up) {
       const isDiagonalMovement = (this.moving.left || this.moving.right)
-      this.y -= this.calculateMovementAmountPixels(isDiagonalMovement)
+      this.y -= this.calculateMovementAmountPixels(MovingDirections.up, isDiagonalMovement)
     }
     if (this.moving.down && !this.blocked.down) {
       const isDiagonalMovement = (this.moving.left || this.moving.right)
-      this.y += this.calculateMovementAmountPixels(isDiagonalMovement)
+      this.y += this.calculateMovementAmountPixels(MovingDirections.down, isDiagonalMovement)
     }
     this.updateMapPosition()
   }
 
+  private movementAccumulator: { [key in MovingDirections]: number } = {
+    left  : 0.0,
+    right : 0.0,
+    up    : 0.0,
+    down  : 0.0,
+  }
+
   /**
    * For this Game Engine we want pixelated movement, meaning that the movement amounts are Integer values
-   * 
+   *
+   * Slow game speed:
+   *   When the game is slowed down enough that one frame worth of movement is below 1,
+   *   the `movementAmountDecimalPart` is sent to the `movementAccumulator`, and the `movementAccumulator`
+   *   is added to the next movement calculation.
+   *   This means that it can take, for example, 3 frames to move 1 pixel.
+   *
+   * Fast game speed:
+   *   When the game is sped up so that one frame worht of movement is above 1,
+   *   we want to preserve the spillover `movementAmountDecimalPart` and add it to
+   *   the next movement calculation.
+   *
+   * This functions makes that happen - and the result is smooth Player/Creature movement :)
+   *
    * @param direction  - One of four possible `MovingDirections`
    * @param isDiagonalMovement - Specifies whether the movement is diagonal or not
+   * @param accumulate - We don't want to accumulate when calling from `calculateNextCoordinates()`
    * @returns - Integer number of pixels to move
    */
-  private calculateMovementAmountPixels(isDiagonalMovement: boolean): number {
+  private calculateMovementAmountPixels(direction: MovingDirections, isDiagonalMovement: boolean, accumulate = true): number {
     const movementAmount = isDiagonalMovement
-      ? GameTime.elapsedTimeFactor * this.maxSpeedDiagonal
-      : GameTime.elapsedTimeFactor * this.maxSpeed        
-    const movementAmountPixels = Math.round(movementAmount)
+      ? (GameTime.elapsedTimeFactor * this.maxSpeedDiagonal) + this.movementAccumulator[direction]
+      : (GameTime.elapsedTimeFactor * this.maxSpeed        ) + this.movementAccumulator[direction]
+    const movementAmountPixels = Math.floor(movementAmount)
+
+    if (accumulate) {
+      const movementAmountDecimalPart = (movementAmount % 1)
+      this.movementAccumulator[direction] = movementAmountDecimalPart
+    }
+
     return movementAmountPixels
   }
 
