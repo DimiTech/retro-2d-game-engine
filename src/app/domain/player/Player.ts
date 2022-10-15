@@ -28,6 +28,7 @@ export default class Player extends Creature {
   // TODO: Adjust for attack feeling
   private attackSpeed = 0.1 // seconds
   private attackCooldown = 0
+  private maxAttackCooldown = (1000 * this.attackSpeed) / CONFIG.GAME_SPEED
 
   private projectiles: Projectile[] = []
 
@@ -132,9 +133,17 @@ export default class Player extends Creature {
   }
 
   public shoot(): void {
+    if (this.attackCooldown >= 0) {
+      this.attackCooldown -= GameTime.frameElapsedTime
+      if (this.attackCooldown < 0) {
+        this.attackCooldown = 0
+      }
+    }
+
     if (this.shooting === false) {
       return
     }
+
     if (this.attackCooldown <= 0) {
       const dx = Canvas.mousePosition.x - Canvas.center.x
       const dy = Canvas.mousePosition.y - Canvas.center.y
@@ -154,13 +163,11 @@ export default class Player extends Creature {
       this.resetAttackCooldown()
 
       SoundFX.playSMG()
-    } else {
-      this.attackCooldown -= GameTime.frameElapsedTime
     }
   }
 
   protected resetAttackCooldown() {
-    this.attackCooldown = (1000 * this.attackSpeed) / CONFIG.GAME_SPEED
+    this.attackCooldown = this.maxAttackCooldown
   }
 
   public takeDamage(damageAmount: number): void {
