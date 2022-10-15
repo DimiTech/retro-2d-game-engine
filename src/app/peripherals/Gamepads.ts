@@ -17,25 +17,35 @@ export default class Gamepads {
     const movementAxisX: number = +gamepad.axes[0].toFixed(2)
     if (movementAxisX > 0) {
       player.moving.right = true
+      player.movingDirections.right = true
     }
     else if (movementAxisX < 0) {
       player.moving.left = true
+      player.movingDirections.left = true
     }
     else {
-      player.moving.left  = false
+      player.moving.left = false
+      player.movingDirections.left = false
+
       player.moving.right = false
+      player.movingDirections.right = false
     }
 
     const movementAxisY: number = +gamepad.axes[1].toFixed(2)
     if (movementAxisY > 0) {
       player.moving.down = true
+      player.movingDirections.down = true
     }
     else if (movementAxisY < 0) {
       player.moving.up = true
+      player.movingDirections.up = true
     }
     else {
-      player.moving.up   = false
+      player.moving.up = false
+      player.movingDirections.up = false
+
       player.moving.down = false
+      player.movingDirections.down = false
     }
   }
 

@@ -27,6 +27,15 @@ export default abstract class Creature {
   public animationSpritePosition: number = 0
 
   public direction: Directions
+
+  // Used for sprite orientation
+  // TODO: Find a better name
+  public movingDirections: { [key in MovingDirections]: boolean } = {
+    left  : false,
+    right : false,
+    up    : false,
+    down  : false,
+  }
   public moving: { [key in MovingDirections]: boolean } = {
     left  : false,
     right : false,
@@ -67,6 +76,10 @@ export default abstract class Creature {
     this.moving.right = false
     this.moving.up    = false
     this.moving.down  = false
+    this.movingDirections.left  = false
+    this.movingDirections.right = false
+    this.movingDirections.up    = false
+    this.movingDirections.down  = false
   }
 
   protected resetBlocked(): void {
@@ -205,113 +218,135 @@ export default abstract class Creature {
 
   protected adjustCollisionWithWalls(): void {
     let wall
-    if (Map.walls[this.row]) {
-      if (this.moving.left) {
-        wall = Map.walls[this.row][this.col - 1] // West
-        if (wall && this.x - this.collisionBox.halfWidth <= wall.mapX + wall.width) {
-          this.x = wall.mapX + wall.width + this.collisionBox.halfWidth + 1
-        }
 
-        const SWVertexRow = Math.floor((this.y + this.collisionBox.halfHeight - 1) / CONFIG.TILE_SIZE)
-        if (SWVertexRow && SWVertexRow !== this.row) { // SW vertex overflows the player grid
-          wall = Map.walls[SWVertexRow][this.col - 1] // South West
-          if (wall && this.x - this.collisionBox.halfWidth <= wall.mapX + wall.width) {
-            if (!(this.moving.down && this.deltas.dyTop <= this.deltas.dxRight)) {
-              this.x = wall.mapX + wall.width + this.collisionBox.halfWidth + 1
-            }
-          }
-        }
+    ///////////////////////////////////////////////////////////////////////////
+    // West
+    ///////////////////////////////////////////////////////////////////////////
+    if (this.moving.left) {
+      wall = Map.walls[this.row][this.col - 1] // West
+      if (wall && this.x - this.collisionBox.halfWidth - 1 <= wall.mapX + wall.width) {
+        this.x = wall.mapX + wall.width + this.collisionBox.halfWidth + 1
+        this.movingDirections.left = false
+      }
 
-        const NWVertexRow = Math.floor((this.y - this.collisionBox.halfHeight) / CONFIG.TILE_SIZE)
-        if (NWVertexRow && NWVertexRow !== this.row) { // NW vertex overflows the player grid
-          wall = Map.walls[NWVertexRow][this.col - 1] // North West
-          if (wall && this.x - this.collisionBox.halfWidth <= wall.mapX + wall.width) {
-            if (!(this.moving.up && this.deltas.dyBottom <= this.deltas.dxRight)) {
-              this.x = wall.mapX + wall.width + this.collisionBox.halfWidth + 1
-            }
+      const SWVertexRow = Math.floor((this.y + this.collisionBox.halfHeight - 1) / CONFIG.TILE_SIZE)
+      if (SWVertexRow && SWVertexRow !== this.row) { // SW vertex overflows the Creature's Tile
+        wall = Map.walls[SWVertexRow][this.col - 1] // South West
+        if (wall && this.x - this.collisionBox.halfWidth - 1 <= wall.mapX + wall.width) {
+          if (!(this.moving.down && this.deltas.dyTop <= this.deltas.dxRight)) {
+            this.x = wall.mapX + wall.width + this.collisionBox.halfWidth + 1
+            this.movingDirections.left = false
           }
         }
       }
-      if (this.moving.right) {
-        wall = Map.walls[this.row][this.col + 1] // East
-        if (wall && this.x + this.collisionBox.halfWidth >= wall.mapX) {
-          this.x = wall.mapX - this.collisionBox.halfWidth - 1
-        }
 
-        const SEVertexRow = Math.floor((this.y + this.collisionBox.halfHeight - 1) / CONFIG.TILE_SIZE)
-        if (SEVertexRow && SEVertexRow !== this.row) { // SE vertex overflows the player grid
-          wall = Map.walls[SEVertexRow][this.col + 1] // South East
-          if (wall && this.x + this.collisionBox.halfWidth >= wall.mapX) {
-            if (!(this.moving.down && this.deltas.dyTop <= this.deltas.dxLeft)) {
-              this.x = wall.mapX - this.collisionBox.halfWidth - 1
-            }
-          }
-        }
-
-        const NEVertexRow = Math.floor((this.y - this.collisionBox.halfHeight) / CONFIG.TILE_SIZE)
-        if (SEVertexRow && NEVertexRow !== this.row) { // NE vertex overflows the player grid
-          wall = Map.walls[NEVertexRow][this.col + 1] // North East
-          if (wall && this.x + this.collisionBox.halfWidth >= wall.mapX) {
-            if (!(this.moving.up && this.deltas.dyBottom <= this.deltas.dxLeft)) {
-              this.x = wall.mapX - this.collisionBox.halfWidth - 1
-            }
+      const NWVertexRow = Math.floor((this.y - this.collisionBox.halfHeight) / CONFIG.TILE_SIZE)
+      if (NWVertexRow && NWVertexRow !== this.row) { // NW vertex overflows the Creature's Tile
+        wall = Map.walls[NWVertexRow][this.col - 1] // North West
+        if (wall && this.x - this.collisionBox.halfWidth - 1 <= wall.mapX + wall.width) {
+          if (!(this.moving.up && this.deltas.dyBottom <= this.deltas.dxRight)) {
+            this.x = wall.mapX + wall.width + this.collisionBox.halfWidth + 1
+            this.movingDirections.left = false
           }
         }
       }
     }
-    if (Map.walls[this.row - 1]) {
-      if (this.moving.up) {
-        wall = Map.walls[this.row - 1][this.col] // North
-        if (wall && this.y - this.collisionBox.halfHeight <= wall.mapY + wall.height) {
-          this.y = wall.mapY + wall.height + this.collisionBox.halfHeight + 1
-        }
 
-        const NEVertexCol = Math.floor((this.x + this.collisionBox.halfWidth - 1) / CONFIG.TILE_SIZE)
-        if (NEVertexCol && NEVertexCol !== this.col) { // NE vertex overflows the player grid
-          wall = Map.walls[this.row - 1][NEVertexCol] // North East
-          if (wall && this.y - this.collisionBox.halfHeight <= wall.mapY + wall.height) {
-            if (!(this.moving.right && this.deltas.dyBottom > this.deltas.dxLeft)) {
-              this.y = wall.mapY + wall.height + this.collisionBox.halfHeight + 1
-            }
+    ///////////////////////////////////////////////////////////////////////////
+    // East
+    ///////////////////////////////////////////////////////////////////////////
+    if (this.moving.right) {
+      wall = Map.walls[this.row][this.col + 1] // East
+      if (wall && this.x + this.collisionBox.halfWidth + 1 >= wall.mapX) {
+        this.x = wall.mapX - this.collisionBox.halfWidth - 1
+        this.movingDirections.right = false
+      }
+
+      const SEVertexRow = Math.floor((this.y + this.collisionBox.halfHeight - 1) / CONFIG.TILE_SIZE)
+      if (SEVertexRow && SEVertexRow !== this.row) { // SE vertex overflows the Creature's Tile
+        wall = Map.walls[SEVertexRow][this.col + 1] // South East
+        if (wall && this.x + this.collisionBox.halfWidth + 1 >= wall.mapX) {
+          if (!(this.moving.down && this.deltas.dyTop <= this.deltas.dxLeft)) {
+            this.x = wall.mapX - this.collisionBox.halfWidth - 1
+            this.movingDirections.right = false
           }
         }
+      }
 
-        const NWVertexCol = Math.floor((this.x - this.collisionBox.halfWidth) / CONFIG.TILE_SIZE)
-        if (NWVertexCol && NWVertexCol !== this.col) { // NW vertex overflows the player grid
-          wall = Map.walls[this.row - 1][NWVertexCol] // North West
-          if (wall && this.y - this.collisionBox.halfHeight <= wall.mapY + wall.height) {
-            if (!(this.moving.left && this.deltas.dyBottom > this.deltas.dxRight)) {
-              this.y = wall.mapY + wall.height + this.collisionBox.halfHeight + 1
-            }
+      const NEVertexRow = Math.floor((this.y - this.collisionBox.halfHeight) / CONFIG.TILE_SIZE)
+      if (SEVertexRow && NEVertexRow !== this.row) { // NE vertex overflows the Creature's Tile
+        wall = Map.walls[NEVertexRow][this.col + 1] // North East
+        if (wall && this.x + this.collisionBox.halfWidth + 1 >= wall.mapX) {
+          if (!(this.moving.up && this.deltas.dyBottom <= this.deltas.dxLeft)) {
+            this.x = wall.mapX - this.collisionBox.halfWidth - 1
+            this.movingDirections.right = false
           }
         }
       }
     }
-    if (Map.walls[this.row + 1]) {
-      if (this.moving.down) {
-        wall = Map.walls[this.row + 1][this.col] // South
-        if (wall && this.y + this.collisionBox.halfHeight >= wall.mapY) {
+
+    ///////////////////////////////////////////////////////////////////////////
+    // North
+    ///////////////////////////////////////////////////////////////////////////
+    if (this.moving.up) {
+      wall = Map.walls[this.row - 1][this.col] // North
+      if (wall && this.y - this.collisionBox.halfHeight - 1 <= wall.mapY + wall.height) {
+        this.y = wall.mapY + wall.height + this.collisionBox.halfHeight + 1
+        this.movingDirections.up = false
+      }
+
+      const NEVertexCol = Math.floor((this.x + this.collisionBox.halfWidth - 1) / CONFIG.TILE_SIZE)
+      if (NEVertexCol && NEVertexCol !== this.col) { // NE vertex overflows the Creature's Tile
+        wall = Map.walls[this.row - 1][NEVertexCol] // North East
+        if (wall && this.y - this.collisionBox.halfHeight - 1 <= wall.mapY + wall.height) {
+          if (!(this.moving.right && this.deltas.dyBottom > this.deltas.dxLeft)) {
+            this.y = wall.mapY + wall.height + this.collisionBox.halfHeight + 1
+            this.movingDirections.up = false
+          }
+        }
+      }
+
+      const NWVertexCol = Math.floor((this.x - this.collisionBox.halfWidth) / CONFIG.TILE_SIZE)
+      if (NWVertexCol && NWVertexCol !== this.col) { // NW vertex overflows the Creature's Tile
+        wall = Map.walls[this.row - 1][NWVertexCol] // North West
+        if (wall && this.y - this.collisionBox.halfHeight - 1 <= wall.mapY + wall.height) {
+          if (!(this.moving.left && this.deltas.dyBottom > this.deltas.dxRight)) {
+            this.y = wall.mapY + wall.height + this.collisionBox.halfHeight + 1
+            this.movingDirections.up = false
+          }
+        }
+      }
+    }
+
+    ///////////////////////////////////////////////////////////////////////////
+    // South 
+    ///////////////////////////////////////////////////////////////////////////
+    if (this.moving.down) {
+      wall = Map.walls[this.row + 1][this.col] // South
+      if (wall && this.y + this.collisionBox.halfHeight + 1 >= wall.mapY) {
+        this.y = wall.mapY - this.collisionBox.halfHeight - 1
+        this.movingDirections.down = false
+      }
+    }
+
+    const SEVertexCol = Math.floor((this.x + this.collisionBox.halfWidth - 1) / CONFIG.TILE_SIZE)
+    if (SEVertexCol && SEVertexCol !== this.col) { // SE vertex overflows the Creature's Tile
+      wall = Map.walls[this.row + 1][SEVertexCol] // South East
+      if (wall && this.y + this.collisionBox.halfHeight + 1 >= wall.mapY) {
+        if (!(this.moving.right && this.deltas.dyTop > this.deltas.dxLeft)) {
           this.y = wall.mapY - this.collisionBox.halfHeight - 1
+          this.movingDirections.down = false
         }
       }
+    }
 
-      const SEVertexCol = Math.floor((this.x + this.collisionBox.halfWidth - 1) / CONFIG.TILE_SIZE)
-      if (SEVertexCol && SEVertexCol !== this.col) { // SE vertex overflows the player grid
-        wall = Map.walls[this.row + 1][SEVertexCol] // South East
-        if (wall && this.y + this.collisionBox.halfHeight >= wall.mapY) {
-          if (!(this.moving.right && this.deltas.dyTop > this.deltas.dxLeft)) {
-            this.y = wall.mapY - this.collisionBox.halfHeight - 1
-          }
-        }
-      }
-
-      const SWVertexCol = Math.floor((this.x - this.collisionBox.halfWidth) / CONFIG.TILE_SIZE)
-      if (SWVertexCol && SWVertexCol !== this.col) { // SW vertex overflows the player grid
-        wall = Map.walls[this.row + 1][SWVertexCol] // South West
-        if (wall && this.y + this.collisionBox.halfHeight >= wall.mapY) {
-          if (!(this.moving.left && this.deltas.dyTop > this.deltas.dxRight)) {
-            this.y = wall.mapY - this.collisionBox.halfHeight - 1
-          }
+    const SWVertexCol = Math.floor((this.x - this.collisionBox.halfWidth) / CONFIG.TILE_SIZE)
+    if (SWVertexCol && SWVertexCol !== this.col) { // SW vertex overflows the Creature's Tile
+      wall = Map.walls[this.row + 1][SWVertexCol] // South West
+      if (wall && this.y + this.collisionBox.halfHeight + 1 >= wall.mapY) {
+        if (!(this.moving.left && this.deltas.dyTop > this.deltas.dxRight)) {
+          this.y = wall.mapY - this.collisionBox.halfHeight - 1
+          this.movingDirections.down = false
         }
       }
     }
@@ -328,20 +363,17 @@ export default abstract class Creature {
   protected updateDirection(): void {
     const direction: string[] = []
 
-    const dx = this.prevX[this.prevX.length - 1] - this.prevX[this.prevX.length - 2]
-    const dy = this.prevY[this.prevY.length - 1] - this.prevY[this.prevY.length - 2]
-
-    if (dy > 0) {
+    if (this.movingDirections.down) {
       direction.push(Directions.S)
     }
-    else if (dy < 0) {
+    else if (this.movingDirections.up) {
       direction.push(Directions.N)
     }
 
-    if (dx > 0) {
+    if (this.movingDirections.right) {
       direction.push(Directions.E)
     }
-    else if (dx < 0) {
+    else if (this.movingDirections.left) {
       direction.push(Directions.W)
     }
 

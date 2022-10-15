@@ -68,9 +68,6 @@ export default class ConcreteEnemy extends Enemy {
       this.setState(CreatureState.Idling)
     }
 
-    this.adjustCollisionWithWalls()
-    this.checkForCollisionWithPlayer(player)
-    this.checkForCollisionWithOtherEnemies(player)
     this.distanceFromTarget = pointToPointDistance(
       { x: player.x, y: player.y },
       { x: this.x,   y: this.y   },
@@ -109,13 +106,18 @@ export default class ConcreteEnemy extends Enemy {
         this.setState(CreatureState.Moving)
       }
     }
+    this.checkForCollisionWithOtherEnemies(player) // Must come before move()
+    this.checkForCollisionWithPlayer(player)       // Must come before move()
 
     if (this.state === CreatureState.Moving) {
       this.move()
     }
 
-    this.updateDirection() // TODO: This is based on movement, which is incorrect - fix it
     this.updateTileDeltas()
+
+    this.adjustCollisionWithWalls()                // Must come after move()
+
+    this.updateDirection() // Must come after adjustCollisionWithWalls()
 
     super.update(player)
 
@@ -220,15 +222,19 @@ export default class ConcreteEnemy extends Enemy {
 
     if (this.x < x) {
       this.moving.right = true
+      this.movingDirections.right = true
     }
     else if (this.x > x) {
       this.moving.left = true
+      this.movingDirections.left = true
     }
     if (this.y < y) {
       this.moving.down = true
+      this.movingDirections.down = true
     }
     else if (this.y > y) {
       this.moving.up = true
+      this.movingDirections.up = true
     }
   }
 

@@ -46,9 +46,9 @@ export default class Player extends Creature {
 
     this.checkForCollisionWithEnemies()
     this.move()
-    this.adjustCollisionWithWalls()
-    this.updateMapPosition()
-    this.updateTileDeltas()
+    this.adjustCollisionWithWalls() // Must come after move()
+    this.updateTileDeltas()         // Must come after adjustCollisionWithWalls()
+    this.updateMapPosition()        // Must come after adjustCollisionWithWalls()
     this.shoot()
     this.projectiles.forEach((p, i) => {
       p.update(this.x, this.y)
@@ -94,15 +94,19 @@ export default class Player extends Creature {
     switch (e.keyCode) {
       case KEYBOARD_KEYS.w:
         this.moving.up = true
+        this.movingDirections.up = true
         break
       case KEYBOARD_KEYS.a:
         this.moving.left = true
+        this.movingDirections.left = true
         break
       case KEYBOARD_KEYS.s:
         this.moving.down = true
+        this.movingDirections.down = true
         break
       case KEYBOARD_KEYS.d:
         this.moving.right = true
+        this.movingDirections.right = true
         break
     }
   }
