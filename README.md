@@ -1,10 +1,17 @@
 # Retro 2D Game Engine (in TypeScript)
 
+Engine design philosophy:
+
+**1. Use Integer values for rendering on the screen**
+
+In order to retain the pixelated, retro look - the engine forces working with
+Integers when calculating the data necessary for rendering.
+
+**2. Important features & debug information can be toggled in `config.json`**
+
 ## Live demo:
 
 https://dusandimitric.github.io/retro-2d-game-engine-demo/
-
-![screenshot](https://framapic.org/B1mgKPxP1smv/4Kida0z151O7 'Screenshot')
 
 ## Run it locally:
 
