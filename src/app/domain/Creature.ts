@@ -113,23 +113,34 @@ export default abstract class Creature {
   }
 
   protected move(): void {
-    if (this.moving.left && !this.blocked.left) {
+
+    if (this.moving.left && !this.blocked.left && this.horizontalMovementControlsAreNotJammed()) {
       const isDiagonalMovement = (this.moving.up || this.moving.down)
       this.x -= this.calculateMovementAmountPixels(MovingDirections.left, isDiagonalMovement)
     }
-    if (this.moving.right && !this.blocked.right) {
+    if (this.moving.right && !this.blocked.right && this.horizontalMovementControlsAreNotJammed()) {
       const isDiagonalMovement = (this.moving.up || this.moving.down)
       this.x += this.calculateMovementAmountPixels(MovingDirections.right, isDiagonalMovement)
     }
-    if (this.moving.up && !this.blocked.up) {
+
+    if (this.moving.up && !this.blocked.up && this.verticalMovementControlsAreNotJammed()) {
       const isDiagonalMovement = (this.moving.left || this.moving.right)
       this.y -= this.calculateMovementAmountPixels(MovingDirections.up, isDiagonalMovement)
     }
-    if (this.moving.down && !this.blocked.down) {
+    if (this.moving.down && !this.blocked.down && this.verticalMovementControlsAreNotJammed()) {
       const isDiagonalMovement = (this.moving.left || this.moving.right)
       this.y += this.calculateMovementAmountPixels(MovingDirections.down, isDiagonalMovement)
     }
+
     this.updateMapPosition()
+  }
+
+  // TODO: Maybe find a better solution for this
+  private horizontalMovementControlsAreNotJammed() { // Detect control jamming by pressing `left` & `right` at the same time
+    return (this.moving.left && this.moving.right) === false
+  }
+  private verticalMovementControlsAreNotJammed() { // Detect control jamming by pressing `up` & `down` at the same time
+    return (this.moving.up && this.moving.down) === false
   }
 
   private movementAccumulator: { [key in MovingDirections]: number } = {
