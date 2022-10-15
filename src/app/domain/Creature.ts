@@ -374,17 +374,17 @@ export default abstract class Creature {
   protected updateDirection(): void {
     const direction: string[] = []
 
-    if (this.movingDirections.down) {
+    if (this.movingDirections.down && this.blocked.down === false) {
       direction.push(Directions.S)
     }
-    else if (this.movingDirections.up) {
+    else if (this.movingDirections.up && this.blocked.up === false) {
       direction.push(Directions.N)
     }
 
-    if (this.movingDirections.right) {
+    if (this.movingDirections.right && this.blocked.right === false) {
       direction.push(Directions.E)
     }
-    else if (this.movingDirections.left) {
+    else if (this.movingDirections.left && this.blocked.left === false) {
       direction.push(Directions.W)
     }
 
