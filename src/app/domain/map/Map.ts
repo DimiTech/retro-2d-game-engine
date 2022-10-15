@@ -44,16 +44,22 @@ export default class Map {
 
   public update(): void {
     Map.enemies.forEach((e, i) => {
-      e.update(this.player)
-      if (e.state === CreatureState.Decaying) {
+      if (e.state === CreatureState.Removed) {
         Map.enemies.splice(i, 1) // Remove the enemy
-        this.openPortalWhenAllEnemiesAreKilled()
       }
+      e.update(this.player)
     })
+    this.openPortalWhenAllEnemiesAreKilled()
   }
 
   private openPortalWhenAllEnemiesAreKilled() {
-    if (Map.exitPortal.isOpen === false && Map.enemies.length === 0) {
+    if (
+      Map.exitPortal.isOpen === false &&
+      (
+        Map.enemies.length === 0 ||
+        Map.enemies.every(e => e.state >= CreatureState.Dying)
+      )
+    ) {
       Map.exitPortal.open()
     }
   }
@@ -61,7 +67,12 @@ export default class Map {
   public draw(): void {
     this.drawGameObjects()
     Map.getEnemiesOnScreen(this.player.x, this.player.y)
-      .forEach(e => e.draw(this.player))
+      .forEach(e => {
+        if (e.state === CreatureState.Removed) {
+          return
+        }
+        e.draw(this.player)
+      })
   }
 
   private drawGameObjects(): void {

@@ -18,6 +18,7 @@ import Projectile from './Projectile'
 import DamageNumbers, { DamageNumberColors, DamageNumberFactory } from '@app/domain/widgets/DamageNumbers'
 
 import SoundFX from '@app/audio/SoundFX'
+import CreatureState from '../CreatureState'
 
 export default class Player extends Creature {
   public alive: boolean = true
@@ -270,6 +271,9 @@ export default class Player extends Creature {
       enemiesOnScreen.some((e) => collisionBoxesIntersect(e, nextPlayerState))
     ) {
       enemiesOnScreen.forEach((e) => {
+        if (e.state >= CreatureState.Dying) {
+          return
+        }
         this.checkIfBlockedByCreature(e, nextPlayerState)
       })
     }

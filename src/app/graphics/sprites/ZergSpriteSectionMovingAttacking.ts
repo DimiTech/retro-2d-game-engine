@@ -5,11 +5,11 @@ import Enemy from '@app/domain/enemies/Enemy'
 
 import CreatureSprite from './CreatureSprite'
 
-export default class SpriteZerg extends CreatureSprite {
+export default class ZergSpriteSectionMovingAttacking extends CreatureSprite {
   public url: string = './graphics/spritesheets/zergling.png'
 
   public numberOfSpritesInAnimation = {
-    walking: 7,
+    moving: 7,
     attacking: 5,
   }
 
@@ -23,35 +23,39 @@ export default class SpriteZerg extends CreatureSprite {
     W : { col: 4, flip: true  },
     NW: { col: 2, flip: true  },
   }
-  private spriteSize = 32
+
+  private spriteWidth  : number = 32
+  private spriteHeight : number = 32
   private spriteStep: Point
+
+  private defaultSpriteOffset = {
+    x: 7,
+    y: 5
+  }
 
   constructor() {
     super()
-    this.spriteStep = { x: this.spriteSize + 11, y: this.spriteSize + 10 }
+    this.spriteStep = { x: this.spriteWidth + 11, y: this.spriteHeight + 10 }
   }
 
   public draw(enemy: Enemy, playerCoordinates: Point) {
-    const spriteOffsets: Point = this.getSpriteOffsets(enemy.state, this.spriteStep)
+    const spriteOffsets: Point = this.getSpriteOffsets(enemy.state)
 
     const spriteLocation = this.spriteLocations[enemy.direction]
 
     this.drawSprite(enemy, playerCoordinates, spriteOffsets, spriteLocation)
   }
 
-  private getSpriteOffsets(enemyState: CreatureState, SPRITE_STEP: Point) {
+  private getSpriteOffsets(enemyState: CreatureState) {
     switch (enemyState) {
       case CreatureState.Moving:
       case CreatureState.Idling:
-        return {
-          x: 7,
-          y: 5
-        }
+        return this.defaultSpriteOffset
       case CreatureState.Attacking:
         const ATTACK_SPRITES_ROW = 7
         return {
-          x: 7,
-          y: 5 + (ATTACK_SPRITES_ROW * SPRITE_STEP.y)
+          x: this.defaultSpriteOffset.x,
+          y: this.defaultSpriteOffset.y + (ATTACK_SPRITES_ROW * this.spriteStep.y)
         }
     }
   }
@@ -79,10 +83,10 @@ export default class SpriteZerg extends CreatureSprite {
       this.spriteSheet,
       spriteOffsets.x + this.spriteStep.x * spriteLocation.col,
       spriteOffsets.y + this.spriteStep.y * Math.floor(enemy.animationSpritePosition),
-      this.spriteSize,
-      this.spriteSize,
-      spriteLocation.flip ? 0 - this.spriteSize / 2 : Canvas.center.x + (x - px - cBox.halfWidth),  // Canvas Desination X
-      spriteLocation.flip ? 0                       : Canvas.center.y + (y - py - cBox.halfHeight), // Canvas Desination Y
+      this.spriteWidth,
+      this.spriteHeight,
+      spriteLocation.flip ? 0 - this.spriteWidth / 2 : Canvas.center.x + (x - px - cBox.halfWidth),  // Canvas Desination X
+      spriteLocation.flip ? 0                        : Canvas.center.y + (y - py - cBox.halfHeight), // Canvas Desination Y
       enemy.collisionBox.width  + 2, // Draw width
       enemy.collisionBox.height + 2, // Draw height
     )

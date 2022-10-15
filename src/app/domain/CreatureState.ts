@@ -4,6 +4,7 @@ enum CreatureState {
   Attacking,
   Dying,
   Decaying,
+  Removed,
 }
 
 export default CreatureState

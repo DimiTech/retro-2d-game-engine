@@ -86,6 +86,9 @@ export default abstract class Enemy extends Creature {
     const enemiesInScreenRangeFromThis = Map.getEnemiesOnScreen(this.x, this.y)
 
     enemiesInScreenRangeFromThis.forEach((e) => {
+      if (e.state >= CreatureState.Dying) {
+        return
+      }
       if (this !== e) {
         this.checkIfBlockedByCreature(e, nextEnemyState)
       }
@@ -138,7 +141,7 @@ export default abstract class Enemy extends Creature {
 
   public die() {
     SoundFX.playEnemyDeath()
-    this.setState(CreatureState.Decaying)
+    this.setState(CreatureState.Dying)
   }
 
   protected dealDamage(p: Player) {

@@ -44,10 +44,13 @@ export default class ConcreteEnemy extends Enemy {
 
   // TODO: See what more can be moved to `Enemy.update()`
   public update(player: Player): void {
-    if (this.state === CreatureState.Dying) {
-      return
-    }
-    if (this.state === CreatureState.Decaying) {
+
+    if (this.state >= CreatureState.Dying) {
+      super.update(player)
+
+      if (Game.stateManager.getState() === GAME_STATES.PLAYING) {
+        this.advanceAnimation()
+      }
       return
     }
 
@@ -115,7 +118,7 @@ export default class ConcreteEnemy extends Enemy {
 
     this.updateTileDeltas()
 
-    this.adjustCollisionWithWalls()                // Must come after move()
+    this.adjustCollisionWithWalls() // Must come after move()
 
     this.updateDirection() // Must come after adjustCollisionWithWalls()
 
@@ -155,10 +158,11 @@ export default class ConcreteEnemy extends Enemy {
       this.animationAttackProgress = (this.animationAttackProgress + GameTime.elapsedTimeFactor) % this.animationAttackLength
       const animationProgressPercentage = this.animationAttackProgress / this.animationAttackLength
       this.animationSpritePosition = Math.floor(animationProgressPercentage * this.sprite.numberOfSpritesInAnimation.attacking) % this.sprite.numberOfSpritesInAnimation.attacking
-    } else if (this.state === CreatureState.Moving) {
+    }
+    else if (this.state === CreatureState.Moving) {
       this.animationMoveProgress = (this.animationMoveProgress + GameTime.elapsedTimeFactor) % this.animationMoveLength
       const animationProgressPercentage = this.animationMoveProgress / this.animationMoveLength
-      this.animationSpritePosition = Math.floor(animationProgressPercentage * this.sprite.numberOfSpritesInAnimation.walking) % this.sprite.numberOfSpritesInAnimation.walking
+      this.animationSpritePosition = Math.floor(animationProgressPercentage * this.sprite.numberOfSpritesInAnimation.moving) % this.sprite.numberOfSpritesInAnimation.moving
     }
   }
 

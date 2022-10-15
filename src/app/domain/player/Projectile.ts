@@ -2,8 +2,9 @@ import * as CONFIG from '@app/configuration/config.json'
 
 import Canvas, { context } from '@app/infrastructure/Canvas'
 
-import Enemy from '@app/domain/enemies/Enemy'
 import Map from '@app/domain/map/Map'
+import Enemy from '@app/domain/enemies/Enemy'
+import CreatureState from '@app/domain/CreatureState'
 
 interface IntermediatePoint {
   x: number
@@ -131,6 +132,11 @@ export default class Projectile {
         point.y >= e.y - e.collisionBox.halfHeight &&
         point.y <= e.y + e.collisionBox.halfHeight
       ) {
+
+        if (e.state >= CreatureState.Dying) {
+          return
+        }
+
         this.alive = false
         e.takeDamage(this.getDamage())
       }
