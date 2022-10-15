@@ -2,7 +2,7 @@ import * as CONFIG from '@app/configuration/config.json'
 
 import Player from '@app/domain/player/Player'
 import CreatureState from '@app/domain/CreatureState'
-import ConcreteEnemy from '@app/domain/enemies/ConcreteEnemy'
+import ConcreteEnemy from '@app/domain/enemies/ConcreteEnemy/ConcreteEnemy'
 import Enemy from '@app/domain/enemies/Enemy'
 import Canvas from '@app/infrastructure/Canvas'
 

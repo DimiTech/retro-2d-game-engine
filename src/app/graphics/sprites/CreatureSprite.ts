@@ -1,13 +1,11 @@
 import Point from '@app/infrastructure/geometry/Point'
-import Enemy from '@app/domain/enemies/Enemy'
+import Creature from '@app/domain/Creature'
 
 export default abstract class CreatureSprite {
   public spriteSheet: HTMLImageElement
 
-  public abstract numberOfSpritesInAnimation: { [animation: string]: number }
-
   protected abstract url: string
-  public abstract draw(e: Enemy, playerCoordinates: Point, animationSpritePosition?: number): void
+  public abstract draw(c: Creature, playerCoordinates: Point, animationSpritePosition?: number): void
 
   public load(callback: () => void): Promise<void> {
     return new Promise((resolve, _reject) => {

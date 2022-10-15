@@ -7,8 +7,9 @@ import CreatureSprite from '@app/graphics/sprites/CreatureSprite'
 
 import Creature from '@app/domain/Creature'
 import CreatureState from '@app/domain/CreatureState'
+import AnimationState from '@app/domain/AnimationState'
 import Player from '@app/domain/player/Player'
-import Map from '@app/domain//map/Map'
+import Map from '@app/domain/map/Map'
 import DamageNumbers, { DamageNumberFactory } from '@app/domain/widgets/DamageNumbers'
 
 import SoundFX from '@app/audio/SoundFX'
@@ -29,12 +30,7 @@ export default abstract class Enemy extends Creature {
   protected readonly attackSpeed: number // seconds
   protected attackCooldown: number       // ms
 
-  protected animationAttackLength   : number // ms
-  protected animationAttackProgress : number // ms
-  protected animationMoveLength     : number // ms
-  protected animationMoveProgress   : number // ms
-  protected animationDyingLength    : number // ms
-  protected animationDyingProgress  : number // ms
+  protected animations: { [key in CreatureState]?: AnimationState }
 
   constructor(
     x: number,
@@ -53,7 +49,10 @@ export default abstract class Enemy extends Creature {
   }
 
   public draw(player: Player): void {
+    this.animations[this.state].draw(this, { x: player.x, y: player.y })
+
     Object.values(this.widgets).forEach(widget => widget.render(player.x, player.y)) // Render widgets
+
   }
 
   public update(player: Player): void {
@@ -158,14 +157,10 @@ export default abstract class Enemy extends Creature {
   public setState(newState: CreatureState) {
     this.previousState = this.state
     this.state = newState
-    this.resetAnimation()
+    this.resetAnimations()
   }
 
-  // Move to Animation objects
-  protected resetAnimation() {
-    this.animationSpritePosition = 0
-    this.animationAttackProgress = 0
-    this.animationMoveProgress = 0
-    this.animationDyingProgress = 0
+  protected resetAnimations() {
+    Object.values(this.animations).forEach(( a: AnimationState ) => a.resetAnimation())
   }
 }

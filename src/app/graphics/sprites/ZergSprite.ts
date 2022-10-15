@@ -1,18 +1,12 @@
 import Canvas, { context } from '@app/infrastructure/Canvas'
 import Point from '@app/infrastructure/geometry/Point'
 import CreatureState from '@app/domain/CreatureState'
-import Enemy from '@app/domain/enemies/Enemy'
 
 import CreatureSprite from './CreatureSprite'
+import Creature from '@app/domain/Creature'
 
 export default class ZergSprite extends CreatureSprite {
   public url: string = './graphics/spritesheets/zergling.png'
-
-  public numberOfSpritesInAnimation = {
-    moving: 7,
-    attacking: 5,
-    dying: 7
-  }
 
   private spriteLocations: { [key: string]: { col: number, flip: boolean } } = {
     N : { col: 0, flip: false },
@@ -25,13 +19,8 @@ export default class ZergSprite extends CreatureSprite {
     NW: { col: 2, flip: true  },
   }
 
-
   private spriteDimensions = {
-    walking: {
-      width: 32,
-      height: 32,
-    },
-    attacking: {
+    default: {
       width: 32,
       height: 32,
     },
@@ -102,30 +91,29 @@ export default class ZergSprite extends CreatureSprite {
     super()
   }
 
-  public draw(enemy: Enemy, playerCoordinates: Point, dyingSpriteNumber = 0) {
-    if (enemy.state === CreatureState.Dying) {
-      this.spriteWidth  = 65
-      this.spriteHeight = 53
+  public draw(creature: Creature, playerCoordinates: Point, animationSpritePosition: number) {
+    if (creature.state === CreatureState.Dying) {
+      this.spriteWidth  = this.spriteDimensions.dying.width
+      this.spriteHeight = this.spriteDimensions.dying.height
     }
     else {
-      this.spriteWidth  = 32
-      this.spriteHeight = 32
+      this.spriteWidth  = this.spriteDimensions.default.width
+      this.spriteHeight = this.spriteDimensions.default.height
     }
 
-
-    const spriteLocation = this.spriteLocations[enemy.direction]
-    if (enemy.state === CreatureState.Dying) {
-      this.drawSpriteDying(enemy, playerCoordinates, dyingSpriteNumber)
+    if (creature.state === CreatureState.Dying) {
+      this.drawSpriteDying(creature, playerCoordinates, animationSpritePosition)
     }
     else {
       this.spriteStep = { x: this.spriteWidth + 11, y: this.spriteHeight + 10 }
-      const spriteOffsets: Point = this.getSpriteOffsets(enemy.state)
-      this.drawSprite(enemy, playerCoordinates, spriteOffsets, spriteLocation)
+      const spriteOffsets: Point = this.getSpriteOffsets(creature.state)
+      const spriteLocation = this.spriteLocations[creature.direction]
+      this.drawSprite(creature, playerCoordinates, spriteOffsets, spriteLocation, animationSpritePosition)
     }
   }
 
-  private getSpriteOffsets(enemyState: CreatureState) {
-    switch (enemyState) {
+  private getSpriteOffsets(creatureState: CreatureState) {
+    switch (creatureState) {
       case CreatureState.Moving:
       case CreatureState.Idling:
         return this.defaultSpriteOffset
@@ -139,21 +127,21 @@ export default class ZergSprite extends CreatureSprite {
   }
 
   private drawSpriteDying(
-    enemy: Enemy,
+    creature: Creature,
     playerCoordinates: Point,
-    dyingSpriteNumber: number
+    animationSpritePosition: number
   ) {
 
-    const { x, y, collisionBox: cBox } = enemy
+    const { x, y, collisionBox: cBox } = creature
     const { x: px, y: py } = playerCoordinates
 
-    const desinationWidth  = Math.floor(this.spriteDimensions.dying.width  * (enemy.collisionBox.width  / 20))
-    const desinationHeight = Math.floor(this.spriteDimensions.dying.height * (enemy.collisionBox.height / 20))
+    const desinationWidth  = Math.floor(this.spriteDimensions.dying.width  * (creature.collisionBox.width  / 20))
+    const desinationHeight = Math.floor(this.spriteDimensions.dying.height * (creature.collisionBox.height / 20))
 
     context.drawImage(
       this.spriteSheet,
-      this.sprites.dying[dyingSpriteNumber].sx,
-      this.sprites.dying[dyingSpriteNumber].sy,
+      this.sprites.dying[animationSpritePosition].sx,
+      this.sprites.dying[animationSpritePosition].sy,
       this.spriteDimensions.dying.width,  // Draw width
       this.spriteDimensions.dying.height, // Draw height
       Canvas.center.x + (x - px - desinationWidth  / 2), // Canvas Desination X
@@ -164,13 +152,14 @@ export default class ZergSprite extends CreatureSprite {
   }
 
   private drawSprite(
-    enemy: Enemy,
+    creature: Creature,
     playerCoordinates: Point,
     spriteOffsets: Point,
     spriteLocation: { col: number, flip: boolean },
+    animationSpritePosition: number,
   ) {
 
-    const { x, y, collisionBox: cBox } = enemy
+    const { x, y, collisionBox: cBox } = creature
     const { x: px, y: py } = playerCoordinates
 
     if (spriteLocation.flip) {
@@ -185,13 +174,13 @@ export default class ZergSprite extends CreatureSprite {
     context.drawImage(
       this.spriteSheet,
       spriteOffsets.x + this.spriteStep.x * spriteLocation.col,
-      spriteOffsets.y + this.spriteStep.y * Math.floor(enemy.animationSpritePosition),
+      spriteOffsets.y + this.spriteStep.y * Math.floor(animationSpritePosition),
       this.spriteWidth,
       this.spriteHeight,
       spriteLocation.flip ? 0 - this.spriteWidth / 2 : Canvas.center.x + (x - px - cBox.halfWidth),  // Canvas Desination X
       spriteLocation.flip ? 0                        : Canvas.center.y + (y - py - cBox.halfHeight), // Canvas Desination Y
-      enemy.collisionBox.width  + 2, // Draw width
-      enemy.collisionBox.height + 2, // Draw height
+      creature.collisionBox.width  + 2, // Draw width
+      creature.collisionBox.height + 2, // Draw height
     )
 
     if (spriteLocation.flip) {

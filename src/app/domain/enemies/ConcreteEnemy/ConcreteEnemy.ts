@@ -1,7 +1,5 @@
 import * as CONFIG from '@app/configuration/config.json'
 
-import SoundFX from '@app/audio/SoundFX'
-
 import Game from '@app/infrastructure/game/Game'
 import GameTime from '@app/infrastructure/GameTime'
 import GAME_STATES from '@app/infrastructure/game/game_states/GameStates'
@@ -15,22 +13,20 @@ import CreatureState from '@app/domain/CreatureState'
 import Player from '@app/domain/player/Player'
 import Enemy from '@app/domain/enemies/Enemy'
 
-import Sprites from '@app/graphics/Sprites'
-import CreatureSprite from '@app/graphics/sprites/CreatureSprite'
+import {
+  ConcreteEnemyAnimationIdling,
+  ConcreteEnemyAnimationMoving,
+  ConcreteEnemyAnimationAttacking,
+  ConcreteEnemyAnimationDying,
+  ConcreteEnemyAnimationDecaying,
+} from './animations'
 
 export default class ConcreteEnemy extends Enemy {
-  protected sprite: CreatureSprite = Sprites.Zerg
   protected target: Point
 
   // TODO: Extract to CreatureState objects
   // TODO: Adjust the feeling of enemy attack & animation
   protected attackSpeed = 0.45 // seconds
-  protected animationAttackLength   = 420 // ms
-  protected animationAttackProgress = 0   // ms
-  protected animationMoveLength     = 330 // ms
-  protected animationMoveProgress   = 0   // ms
-  protected animationDyingLength    = 500 // ms
-  protected animationDyingProgress  = 0   // ms
 
   constructor(
     x: number,
@@ -42,6 +38,14 @@ export default class ConcreteEnemy extends Enemy {
     super(x, y, new CollisionBox(14, 14), speed, healthPercentage)
 
     this.pathfindingTimer = (9 * pathfindingTimerStart) % this.pathfindingInterval
+
+    this.animations = {
+      [CreatureState.Idling   ]: new ConcreteEnemyAnimationIdling(),
+      [CreatureState.Moving   ]: new ConcreteEnemyAnimationMoving(),
+      [CreatureState.Attacking]: new ConcreteEnemyAnimationAttacking(),
+      [CreatureState.Dying    ]: new ConcreteEnemyAnimationDying(),
+      [CreatureState.Decaying ]: new ConcreteEnemyAnimationDecaying(),
+    }
   }
 
   // TODO: See what more can be moved to `Enemy.update()`
@@ -145,11 +149,9 @@ export default class ConcreteEnemy extends Enemy {
     if (CONFIG.DEBUG.PATHFINDING_NODES) {
       debug_drawPathNodes(this.pathfindingNodes, player, this.getHealthColor())
     }
-
     if (CONFIG.DEBUG.SHORTEST_PATH_TO_PLAYER) {
       this.debug_drawShortestPathToPlayer(player)
     }
-    this.sprite.draw(this, { x: player.x, y: player.y }, this.animationSpritePosition)
 
     super.draw(player)
   }
@@ -157,23 +159,14 @@ export default class ConcreteEnemy extends Enemy {
   protected advanceAnimation(): void {
     // TODO: Extract to CreatureState objects
     if (this.state === CreatureState.Attacking) {
-      this.animationAttackProgress = (this.animationAttackProgress + GameTime.elapsedTimeFactor) % this.animationAttackLength
-      const animationProgressPercentage = this.animationAttackProgress / this.animationAttackLength
-      this.animationSpritePosition = Math.floor(animationProgressPercentage * this.sprite.numberOfSpritesInAnimation.attacking) % this.sprite.numberOfSpritesInAnimation.attacking
+      this.animations[this.state].advanceAnimation()
     }
     else if (this.state === CreatureState.Moving) {
-      this.animationMoveProgress = (this.animationMoveProgress + GameTime.elapsedTimeFactor) % this.animationMoveLength
-      const animationProgressPercentage = this.animationMoveProgress / this.animationMoveLength
-      this.animationSpritePosition = Math.floor(animationProgressPercentage * this.sprite.numberOfSpritesInAnimation.moving) % this.sprite.numberOfSpritesInAnimation.moving
+      this.animations[this.state].advanceAnimation()
     }
     else if (this.state === CreatureState.Dying) {
-      // Single shot animation
-      this.animationDyingProgress = this.animationDyingProgress + GameTime.elapsedTimeFactor
-      const animationProgressPercentage = this.animationDyingProgress / this.animationDyingLength
-      this.animationSpritePosition = Math.floor(animationProgressPercentage * this.sprite.numberOfSpritesInAnimation.dying) % this.sprite.numberOfSpritesInAnimation.moving
-
-      const dyingAnimationFinished = animationProgressPercentage >= 1.0
-      if (dyingAnimationFinished) {
+      this.animations[this.state].advanceAnimation()
+      if (this.animations[this.state].animationFinished) {
         this.setState(CreatureState.Removed) // TODO: Set state to `Decaying` instead
       }
     }
