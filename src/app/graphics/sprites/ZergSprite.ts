@@ -19,7 +19,7 @@ export default class ZergSprite extends CreatureSprite {
     NW: { col: 2, flip: true  },
   }
 
-  private spriteDimensions = {
+  private spriteProperties = {
     default: {
       width: 32,
       height: 32,
@@ -28,63 +28,41 @@ export default class ZergSprite extends CreatureSprite {
       width: 65,
       height: 53,
       gapX: 3,
+      sy: 548,
     }
   }
 
-  private sprites = {
+  private manuallyCalculatedSprites = {
     dying: [
       {
-        sx: 2 + 0 * (this.spriteDimensions.dying.width + this.spriteDimensions.dying.gapX),
-        sy: 548,
-        sWidth: this.spriteDimensions.dying.width,
-        sHeight: this.spriteDimensions.dying.height,
+        sx: 0 * (this.spriteProperties.dying.width + this.spriteProperties.dying.gapX) + 2,
+        sy: this.spriteProperties.dying.sy,
       },
       {
-        sx: 2 + 1 * (this.spriteDimensions.dying.width + this.spriteDimensions.dying.gapX),
-        sy: 548,
-        sWidth: this.spriteDimensions.dying.width,
-        sHeight: this.spriteDimensions.dying.height,
+        sx: 1 * (this.spriteProperties.dying.width + this.spriteProperties.dying.gapX) + 2,
+        sy: this.spriteProperties.dying.sy,
       },
       {
-        sx: 2 + 2 * (this.spriteDimensions.dying.width + this.spriteDimensions.dying.gapX),
-        sy: 548,
-        sWidth: this.spriteDimensions.dying.width,
-        sHeight: this.spriteDimensions.dying.height,
+        sx: 2 * (this.spriteProperties.dying.width + this.spriteProperties.dying.gapX) + 2,
+        sy: this.spriteProperties.dying.sy,
       },
       {
-        sx: 2 + 3 * (this.spriteDimensions.dying.width + this.spriteDimensions.dying.gapX),
-        sy: 548,
-        sWidth: this.spriteDimensions.dying.width,
-        sHeight: this.spriteDimensions.dying.height,
+        sx: 3 * (this.spriteProperties.dying.width + this.spriteProperties.dying.gapX) + 2,
+        sy: this.spriteProperties.dying.sy,
       },
       {
-        sx: 2 + 4 * (this.spriteDimensions.dying.width + this.spriteDimensions.dying.gapX),
-        sy: 548,
-        sWidth: this.spriteDimensions.dying.width,
-        sHeight: this.spriteDimensions.dying.height,
+        sx: 4 * (this.spriteProperties.dying.width + this.spriteProperties.dying.gapX) + 2,
+        sy: this.spriteProperties.dying.sy,
       },
       {
-        sx: 2 + 5 * (this.spriteDimensions.dying.width + this.spriteDimensions.dying.gapX),
-        sy: 548,
-        sWidth: this.spriteDimensions.dying.width,
-        sHeight: this.spriteDimensions.dying.height,
+        sx: 5 * (this.spriteProperties.dying.width + this.spriteProperties.dying.gapX) + 2,
+        sy: this.spriteProperties.dying.sy,
       },
       {
-        sx: 2 + 6 * (this.spriteDimensions.dying.width + this.spriteDimensions.dying.gapX),
-        sy: 548,
-        sWidth: this.spriteDimensions.dying.width,
-        sHeight: this.spriteDimensions.dying.height,
+        sx: 6 * (this.spriteProperties.dying.width + this.spriteProperties.dying.gapX) + 2,
+        sy: this.spriteProperties.dying.sy,
       },
     ]
-  }
-
-  private spriteWidth: number
-  private spriteHeight: number
-  private spriteStep: Point
-
-  private defaultSpriteOffset = {
-    x: 7,
-    y: 5
   }
 
   constructor() {
@@ -93,35 +71,32 @@ export default class ZergSprite extends CreatureSprite {
 
   public draw(creature: Creature, playerCoordinates: Point, animationSpritePosition: number) {
     if (creature.state === CreatureState.Dying) {
-      this.spriteWidth  = this.spriteDimensions.dying.width
-      this.spriteHeight = this.spriteDimensions.dying.height
-    }
-    else {
-      this.spriteWidth  = this.spriteDimensions.default.width
-      this.spriteHeight = this.spriteDimensions.default.height
-    }
-
-    if (creature.state === CreatureState.Dying) {
       this.drawSpriteDying(creature, playerCoordinates, animationSpritePosition)
     }
     else {
-      this.spriteStep = { x: this.spriteWidth + 11, y: this.spriteHeight + 10 }
-      const spriteOffsets: Point = this.getSpriteOffsets(creature.state)
+      const spriteWidth  = this.spriteProperties.default.width
+      const spriteHeight = this.spriteProperties.default.height
+      const spriteStep: Point = { x: spriteWidth + 11, y: spriteHeight + 10 }
+      const spriteOffsets: Point = this.getSpriteOffsets(creature.state, spriteStep)
       const spriteLocation = this.spriteLocations[creature.direction]
-      this.drawSprite(creature, playerCoordinates, spriteOffsets, spriteLocation, animationSpritePosition)
+      this.drawSprite(creature, playerCoordinates, spriteOffsets, spriteStep, spriteLocation, spriteWidth, spriteHeight, animationSpritePosition)
     }
   }
 
-  private getSpriteOffsets(creatureState: CreatureState) {
+  private getSpriteOffsets(creatureState: CreatureState, spriteStep: Point) {
+    const defaultSpriteOffset = {
+      x: 7,
+      y: 5
+    }
     switch (creatureState) {
       case CreatureState.Moving:
       case CreatureState.Idling:
-        return this.defaultSpriteOffset
+        return defaultSpriteOffset
       case CreatureState.Attacking:
         const ATTACK_SPRITES_ROW = 7
         return {
-          x: this.defaultSpriteOffset.x,
-          y: this.defaultSpriteOffset.y + (ATTACK_SPRITES_ROW * this.spriteStep.y)
+          x: defaultSpriteOffset.x,
+          y: defaultSpriteOffset.y + (ATTACK_SPRITES_ROW * spriteStep.y)
         }
     }
   }
@@ -132,22 +107,22 @@ export default class ZergSprite extends CreatureSprite {
     animationSpritePosition: number
   ) {
 
-    const { x, y, collisionBox: cBox } = creature
+    const { x, y } = creature
     const { x: px, y: py } = playerCoordinates
 
-    const desinationWidth  = Math.floor(this.spriteDimensions.dying.width  * (creature.collisionBox.width  / 20))
-    const desinationHeight = Math.floor(this.spriteDimensions.dying.height * (creature.collisionBox.height / 20))
+    const desinationWidth  = Math.floor(this.spriteProperties.dying.width  * (creature.collisionBox.width  / 20))
+    const desinationHeight = Math.floor(this.spriteProperties.dying.height * (creature.collisionBox.height / 20))
 
     context.drawImage(
       this.spriteSheet,
-      this.sprites.dying[animationSpritePosition].sx,
-      this.sprites.dying[animationSpritePosition].sy,
-      this.spriteDimensions.dying.width,  // Draw width
-      this.spriteDimensions.dying.height, // Draw height
+      this.manuallyCalculatedSprites.dying[animationSpritePosition].sx,
+      this.manuallyCalculatedSprites.dying[animationSpritePosition].sy,
+      this.spriteProperties.dying.width,  // Draw width
+      this.spriteProperties.dying.height, // Draw height
       Canvas.center.x + (x - px - desinationWidth  / 2), // Canvas Desination X
       Canvas.center.y + (y - py - desinationHeight / 2), // Canvas Desination Y
-      desinationWidth, // Draw width
-      desinationHeight, // Draw height
+      desinationWidth,
+      desinationHeight,
     )
   }
 
@@ -155,7 +130,10 @@ export default class ZergSprite extends CreatureSprite {
     creature: Creature,
     playerCoordinates: Point,
     spriteOffsets: Point,
+    spriteStep: Point,
     spriteLocation: { col: number, flip: boolean },
+    spriteWidth: number,
+    spriteHeight: number,
     animationSpritePosition: number,
   ) {
 
@@ -171,16 +149,19 @@ export default class ZergSprite extends CreatureSprite {
       context.scale(-1, 1)
     }
 
+    const desinationWidth  = creature.collisionBox.width  + 2
+    const desinationHeight = creature.collisionBox.height + 2
+
     context.drawImage(
       this.spriteSheet,
-      spriteOffsets.x + this.spriteStep.x * spriteLocation.col,
-      spriteOffsets.y + this.spriteStep.y * Math.floor(animationSpritePosition),
-      this.spriteWidth,
-      this.spriteHeight,
-      spriteLocation.flip ? 0 - this.spriteWidth / 2 : Canvas.center.x + (x - px - cBox.halfWidth),  // Canvas Desination X
-      spriteLocation.flip ? 0                        : Canvas.center.y + (y - py - cBox.halfHeight), // Canvas Desination Y
-      creature.collisionBox.width  + 2, // Draw width
-      creature.collisionBox.height + 2, // Draw height
+      spriteOffsets.x + spriteStep.x * spriteLocation.col,
+      spriteOffsets.y + spriteStep.y * Math.floor(animationSpritePosition),
+      spriteWidth,
+      spriteHeight,
+      spriteLocation.flip ? 0 - spriteWidth / 2 : Canvas.center.x + (x - px - cBox.halfWidth),  // Canvas Desination X
+      spriteLocation.flip ? 0                   : Canvas.center.y + (y - py - cBox.halfHeight), // Canvas Desination Y
+      desinationWidth,
+      desinationHeight,
     )
 
     if (spriteLocation.flip) {
