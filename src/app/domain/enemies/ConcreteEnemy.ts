@@ -25,10 +25,10 @@ export default class ConcreteEnemy extends Enemy {
   // TODO: Extract to CreatureState objects
   // TODO: Adjust the feeling of enemy attack & animation
   protected attackSpeed = 0.45 // seconds
-  protected animationLengthAttack   = 420 // ms
-  protected animationProgressAttack = 0   // ms
-  protected animationLengthMove     = 330 // ms
-  protected animationProgressMove   = 0   // ms
+  protected animationAttackLength   = 420 // ms
+  protected animationAttackProgress = 0   // ms
+  protected animationMoveLength   = 330 // ms
+  protected animationMoveProgress = 0   // ms
 
   constructor(
     x: number,
@@ -152,11 +152,13 @@ export default class ConcreteEnemy extends Enemy {
   protected advanceAnimation(): void {
     // TODO: Extract to CreatureState objects
     if (this.state === CreatureState.Attacking) {
-      this.animationProgressAttack = (this.animationProgressAttack + GameTime.elapsedTimeFactor) % this.animationLengthAttack
-      this.animationSpritePosition = Math.round((this.animationProgressAttack / this.animationLengthAttack) * this.sprite.numberOfSpritesInAnimation.attacking) % this.sprite.numberOfSpritesInAnimation.attacking
+      this.animationAttackProgress = (this.animationAttackProgress + GameTime.elapsedTimeFactor) % this.animationAttackLength
+      const animationProgressPercentage = this.animationAttackProgress / this.animationAttackLength
+      this.animationSpritePosition = Math.floor(animationProgressPercentage * this.sprite.numberOfSpritesInAnimation.attacking) % this.sprite.numberOfSpritesInAnimation.attacking
     } else if (this.state === CreatureState.Moving) {
-      this.animationProgressMove = (this.animationProgressMove + GameTime.elapsedTimeFactor) % this.animationLengthMove
-      this.animationSpritePosition = Math.round((this.animationProgressMove / this.animationLengthMove) * this.sprite.numberOfSpritesInAnimation.walking) % this.sprite.numberOfSpritesInAnimation.walking
+      this.animationMoveProgress = (this.animationMoveProgress + GameTime.elapsedTimeFactor) % this.animationMoveLength
+      const animationProgressPercentage = this.animationMoveProgress / this.animationMoveLength
+      this.animationSpritePosition = Math.floor(animationProgressPercentage * this.sprite.numberOfSpritesInAnimation.walking) % this.sprite.numberOfSpritesInAnimation.walking
     }
   }
 

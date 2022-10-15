@@ -29,10 +29,10 @@ export default abstract class Enemy extends Creature {
   protected readonly attackSpeed: number // seconds
   protected attackCooldown: number       // ms
 
-  protected animationLengthAttack   : number // ms
-  protected animationProgressAttack : number // ms
-  protected animationLengthMove     : number // ms
-  protected animationProgressMove   : number // ms
+  protected animationAttackLength   : number // ms
+  protected animationAttackProgress : number // ms
+  protected animationMoveLength     : number // ms
+  protected animationMoveProgress   : number // ms
 
   constructor(
     x: number,
@@ -159,7 +159,7 @@ export default abstract class Enemy extends Creature {
   // Move to Animation objects
   protected resetAnimation() {
     this.animationSpritePosition = 0
-    this.animationProgressAttack = 0
-    this.animationProgressMove = 0
+    this.animationAttackProgress = 0
+    this.animationMoveProgress = 0
   }
 }

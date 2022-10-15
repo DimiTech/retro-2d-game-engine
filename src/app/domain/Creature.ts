@@ -9,12 +9,16 @@ import CreatureState from '@app/domain/CreatureState'
 import { Widget } from '@app/domain/widgets/DamageNumbers'
 
 export default abstract class Creature {
+  private prevHistoryLength = 8
   public prevX: number[] = [] // TODO: Make private?
   public prevY: number[] = [] // TODO: Make private?
+
   public nextX: number
   public nextY: number
+
   public row: number
   public col: number
+
   public maxHealth = 100
   public health: number
 
@@ -365,10 +369,10 @@ export default abstract class Creature {
 
   protected updatePreviousCoordinates(): void {
     this.prevX.push(this.x)
-    if (this.prevX.length > 5) { this.prevX.shift() }
+    if (this.prevX.length > this.prevHistoryLength) { this.prevX.shift() }
 
     this.prevY.push(this.y)
-    if (this.prevY.length > 5) { this.prevY.shift() }
+    if (this.prevY.length > this.prevHistoryLength) { this.prevY.shift() }
   }
 
   protected updateDirection(): void {
@@ -394,16 +398,9 @@ export default abstract class Creature {
   }
 
   protected checkIfMoving(): boolean {
-    const xUnchanged =
-      this.prevX[0] === this.prevX[this.prevX.length - 4] &&
-      this.prevX[0] === this.prevX[this.prevX.length - 3] &&
-      this.prevX[0] === this.prevX[this.prevX.length - 2] &&
-      this.prevX[0] === this.prevX[this.prevX.length - 1]
-    const yUnchanged =
-      this.prevY[0] === this.prevY[this.prevY.length - 4] &&
-      this.prevY[0] === this.prevY[this.prevY.length - 3] &&
-      this.prevY[0] === this.prevY[this.prevY.length - 2] &&
-      this.prevY[0] === this.prevY[this.prevY.length - 1]
+    // Check if all of the recorded prevX & prevY positions are the same
+    const xUnchanged = this.prevX.every((prevX, i) => (i === 0) ? true : (prevX === this.prevX[0]))
+    const yUnchanged = this.prevY.every((prevY, i) => (i === 0) ? true : (prevY === this.prevY[0]))
     if (xUnchanged && yUnchanged) {
       return false
     } else {
