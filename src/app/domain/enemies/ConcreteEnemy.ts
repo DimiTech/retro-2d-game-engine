@@ -15,8 +15,8 @@ import CreatureState from '@app/domain/CreatureState'
 import Player from '@app/domain/player/Player'
 import Enemy from '@app/domain/enemies/Enemy'
 
-import CreatureSprite from '@app/graphics/sprites/CreatureSprite'
 import Sprites from '@app/graphics/Sprites'
+import CreatureSprite from '@app/graphics/sprites/CreatureSprite'
 
 export default class ConcreteEnemy extends Enemy {
   protected sprite: CreatureSprite = Sprites.Zerg
@@ -27,8 +27,10 @@ export default class ConcreteEnemy extends Enemy {
   protected attackSpeed = 0.45 // seconds
   protected animationAttackLength   = 420 // ms
   protected animationAttackProgress = 0   // ms
-  protected animationMoveLength   = 330 // ms
-  protected animationMoveProgress = 0   // ms
+  protected animationMoveLength     = 330 // ms
+  protected animationMoveProgress   = 0   // ms
+  protected animationDyingLength    = 500 // ms
+  protected animationDyingProgress  = 0   // ms
 
   constructor(
     x: number,
@@ -147,7 +149,7 @@ export default class ConcreteEnemy extends Enemy {
     if (CONFIG.DEBUG.SHORTEST_PATH_TO_PLAYER) {
       this.debug_drawShortestPathToPlayer(player)
     }
-    this.sprite.draw(this, { x: player.x, y: player.y })
+    this.sprite.draw(this, { x: player.x, y: player.y }, this.animationSpritePosition)
 
     super.draw(player)
   }
@@ -163,6 +165,17 @@ export default class ConcreteEnemy extends Enemy {
       this.animationMoveProgress = (this.animationMoveProgress + GameTime.elapsedTimeFactor) % this.animationMoveLength
       const animationProgressPercentage = this.animationMoveProgress / this.animationMoveLength
       this.animationSpritePosition = Math.floor(animationProgressPercentage * this.sprite.numberOfSpritesInAnimation.moving) % this.sprite.numberOfSpritesInAnimation.moving
+    }
+    else if (this.state === CreatureState.Dying) {
+      // Single shot animation
+      this.animationDyingProgress = this.animationDyingProgress + GameTime.elapsedTimeFactor
+      const animationProgressPercentage = this.animationDyingProgress / this.animationDyingLength
+      this.animationSpritePosition = Math.floor(animationProgressPercentage * this.sprite.numberOfSpritesInAnimation.dying) % this.sprite.numberOfSpritesInAnimation.moving
+
+      const dyingAnimationFinished = animationProgressPercentage >= 1.0
+      if (dyingAnimationFinished) {
+        this.setState(CreatureState.Removed) // TODO: Set state to `Decaying` instead
+      }
     }
   }
 

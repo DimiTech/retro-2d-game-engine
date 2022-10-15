@@ -7,7 +7,7 @@ export default abstract class CreatureSprite {
   public abstract numberOfSpritesInAnimation: { [animation: string]: number }
 
   protected abstract url: string
-  public abstract draw(e: Enemy, playerCoordinates: Point): void
+  public abstract draw(e: Enemy, playerCoordinates: Point, animationSpritePosition?: number): void
 
   public load(callback: () => void): Promise<void> {
     return new Promise((resolve, _reject) => {

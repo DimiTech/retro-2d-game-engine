@@ -33,6 +33,8 @@ export default abstract class Enemy extends Creature {
   protected animationAttackProgress : number // ms
   protected animationMoveLength     : number // ms
   protected animationMoveProgress   : number // ms
+  protected animationDyingLength    : number // ms
+  protected animationDyingProgress  : number // ms
 
   constructor(
     x: number,
@@ -164,5 +166,6 @@ export default abstract class Enemy extends Creature {
     this.animationSpritePosition = 0
     this.animationAttackProgress = 0
     this.animationMoveProgress = 0
+    this.animationDyingProgress = 0
   }
 }
