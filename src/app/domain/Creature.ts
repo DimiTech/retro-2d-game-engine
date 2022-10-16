@@ -1,8 +1,9 @@
 import * as CONFIG from '@app/configuration/config.json'
 
+import { angleBetweenPoints } from '@app/infrastructure/geometry/Point'
 import GameTime from '@app/infrastructure/GameTime'
 import CollisionBox, { collisionBoxesIntersect, ICollidable } from '@app/infrastructure/CollisionBox'
-import { Directions, MovingDirections } from '@app/infrastructure/Directions'
+import { Directions, MovingDirections, getDirectionBasedOnAngle } from '@app/infrastructure/Directions'
 
 import Map from '@app/domain/map/Map'
 import CreatureState from '@app/domain/CreatureState'
@@ -375,7 +376,16 @@ export default abstract class Creature {
     if (this.prevY.length > this.prevHistoryLength) { this.prevY.shift() }
   }
 
-  protected updateDirection(): void {
+  protected updateDirection(targetCreature: Creature): void {
+    if (this.state === CreatureState.Attacking) {
+      this.updateDirectionWhenAttacking(targetCreature)
+    }
+    else {
+      this.updateDirectionWhenMoving()
+    }
+  }
+
+  private updateDirectionWhenMoving(): void {
     const direction: string[] = []
 
     if (this.movingDirections.down && this.blocked.down === false) {
@@ -395,6 +405,11 @@ export default abstract class Creature {
     const directionString = direction.join('') || this.direction || 'S'
 
     this.direction = Directions[directionString as keyof typeof Directions]
+  }
+
+  private updateDirectionWhenAttacking(targetCreature: Creature): void {
+    const theta = angleBetweenPoints(targetCreature, this)
+    this.direction = getDirectionBasedOnAngle(theta)
   }
 
   protected checkIfMoving(): boolean {

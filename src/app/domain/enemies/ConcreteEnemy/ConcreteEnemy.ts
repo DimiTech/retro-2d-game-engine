@@ -133,7 +133,7 @@ export default class ConcreteEnemy extends Enemy {
 
     this.adjustCollisionWithWalls() // Must come after move()
 
-    this.updateDirection() // Must come after adjustCollisionWithWalls()
+    this.updateDirection(player) // Must come after adjustCollisionWithWalls()
 
     super.update(player)
 
