@@ -1,3 +1,5 @@
+import Map from '@app/domain/map/Map'
+
 import { totalNumberOfMaps } from '@app/domain/map/Maps'
 
 export default class Level {
@@ -14,6 +16,8 @@ export default class Level {
   }
 
   public static nextLevel() {
+    Map.clear()
+
     Level.currentLevel++
 
     LevelTimer.reset()

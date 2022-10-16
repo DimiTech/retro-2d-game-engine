@@ -4,13 +4,11 @@ import CreatureSprite from '@app/graphics/sprites/CreatureSprite'
 import AnimationState from '@app/domain/AnimationState'
 
 export default class ConcreteEnemyAnimationDecaying extends AnimationState {
-  protected sprite: CreatureSprite = Sprites.Zerg
+  protected sprite: CreatureSprite = Sprites.Decay
 
-  protected animationLength   = 0
+  protected animationLength   = 10000
   protected animationProgress = 0
 
   protected animationSpritePosition    = 0
-  protected numberOfSpritesInAnimation = 0
-
-  // TODO: Implement
+  protected numberOfSpritesInAnimation = 3
 }

@@ -18,6 +18,7 @@ import Level from '@app/domain/Level'
 export default class Map {
   public static walls: Wall[][] = []
   public static enemies: Enemy[] = []
+  public static enemiesDecaying: Enemy[] = []
   public static exitPortal: Portal
 
   public player: Player
@@ -26,8 +27,16 @@ export default class Map {
     return Map.enemies.filter(e => e.isOnScreen(playerX, playerY))
   }
 
+  public static getDecayingOnScreen(playerX: number, playerY: number): Enemy[] {
+    return Map.enemiesDecaying.filter(e => e.isOnScreen(playerX, playerY))
+  }
+
   public static enemiesRemaining(): number {
     return Map.enemies.length
+  }
+
+  public static clear(): void {
+    Map.enemiesDecaying = []
   }
 
   constructor() {
@@ -44,11 +53,21 @@ export default class Map {
 
   public update(): void {
     Map.enemies.forEach((e, i) => {
-      if (e.state === CreatureState.Removed) {
-        Map.enemies.splice(i, 1) // Remove the enemy
+      if (e.state === CreatureState.Decaying) {
+        // Remove from `enemies` & add to `enemiesDecaying`
+        Map.enemies.splice(i, 1)
+        Map.enemiesDecaying.push(e)
       }
       e.update(this.player)
     })
+
+    Map.enemiesDecaying.forEach((e, i) => {
+      e.update(this.player)
+      if (e.state === CreatureState.Removed) {
+        Map.enemiesDecaying.splice(i, 1)
+      }
+    })
+
     this.openPortalWhenAllEnemiesAreKilled()
   }
 
@@ -66,7 +85,14 @@ export default class Map {
 
   public draw(): void {
     this.drawGameObjects()
+
+    // First draw decaying enemies
+    Map.getDecayingOnScreen(this.player.x, this.player.y)
+      .forEach(e => e.draw(this.player))
+
+    // Then draw alive enemies on top
     Map.getEnemiesOnScreen(this.player.x, this.player.y)
+      .filter(e => e.state !== CreatureState.Removed)
       .forEach(e => {
         if (e.state === CreatureState.Removed) {
           return

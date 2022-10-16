@@ -138,10 +138,9 @@ export default class ConcreteEnemy extends Enemy {
   // TODO: See what more can be moved to `Enemy.draw()`
   public draw(player: Player): void {
     if (CONFIG.DEBUG.ENEMY_COLLISION_BOX) {
-      this.debug_drawCollisionBox(player)
-    }
-    if (CONFIG.DEBUG.ENEMY_STATE) {
-      this.debug_drawState(player)
+      if (this.state < CreatureState.Dying) {
+        this.debug_drawCollisionBox(player)
+      }
     }
     if (CONFIG.DEBUG.RAY_TO_PLAYER) {
       this.debug_drawRayToPlayer(player)
@@ -154,10 +153,14 @@ export default class ConcreteEnemy extends Enemy {
     }
 
     super.draw(player)
+
+    if (CONFIG.DEBUG.ENEMY_STATE) {
+      this.debug_drawState(player)
+    }
   }
 
+  // TODO: Extract to ConcreteEnemyAnimationLifecycle object (or something like that)
   protected advanceAnimation(): void {
-    // TODO: Extract to CreatureState objects
     if (this.state === CreatureState.Attacking) {
       this.animations[this.state].advanceAnimation()
     }
@@ -167,7 +170,13 @@ export default class ConcreteEnemy extends Enemy {
     else if (this.state === CreatureState.Dying) {
       this.animations[this.state].advanceAnimation()
       if (this.animations[this.state].animationFinished) {
-        this.setState(CreatureState.Removed) // TODO: Set state to `Decaying` instead
+        this.setState(CreatureState.Decaying)
+      }
+    }
+    else if (this.state === CreatureState.Decaying) {
+      this.animations[this.state].advanceAnimation()
+      if (this.animations[this.state].animationFinished) {
+        this.setState(CreatureState.Removed)
       }
     }
   }
