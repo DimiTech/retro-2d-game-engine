@@ -185,7 +185,11 @@ export default class Player extends Creature {
       this.die()
     }
     else {
-      SoundFX.playPlayerHit()
+      switch (attackEdgeCase) {
+        case null:
+          SoundFX.playPlayerHit()
+          break
+      }
     }
   }
 
