@@ -181,6 +181,9 @@ export default class Player extends Creature {
     if (this.health <= 0) {
       this.die()
     }
+    else {
+      SoundFX.playPlayerHit()
+    }
   }
 
   private calculateTheta(): number {
@@ -282,5 +285,7 @@ export default class Player extends Creature {
   private die(): void {
     // TODO: Re-use CreatureState
     this.alive = false
+
+    SoundFX.playPlayerDeath()
   }
 }

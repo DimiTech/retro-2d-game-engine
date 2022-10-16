@@ -115,7 +115,7 @@ export default abstract class Enemy extends Creature {
     if (this.attackCooldown <= 0) {
       this.resetAttackCooldown()
 
-      SoundFX.playSMG() // TODO: Change the SFX
+      SoundFX.playEnemyAttack()
       this.dealDamage(p)
     } else {
       this.attackCooldown -= GameTime.frameElapsedTime
@@ -127,15 +127,14 @@ export default abstract class Enemy extends Creature {
   }
 
   public takeDamage(damageAmount: number): void {
-    SoundFX.playEnemyHit()
-
     this.health -= damageAmount
 
     this.widgets.damageNumbers.push(DamageNumberFactory.create(this.x, this.y, this.collisionBox, damageAmount))
 
     if (this.health <= 0) {
       this.die()
-    } else {
+    }
+    else {
       SoundFX.playEnemyHit()
     }
   }
