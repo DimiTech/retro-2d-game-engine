@@ -1,6 +1,6 @@
 import * as CONFIG from '@app/configuration/config.json'
 
-import GameTime from '@app/infrastructure/GameTime'
+import Raycaster from '@app/infrastructure/Raycaster'
 import CollisionBox from '@app/infrastructure/CollisionBox'
 import { PathNode } from '@app/infrastructure/Pathfinding'
 import CreatureSprite from '@app/graphics/sprites/CreatureSprite'
@@ -105,9 +105,8 @@ export default abstract class Enemy extends Creature {
 
   protected targetInEffectiveRange(target: Creature) {
     const sumOfCollisionBoxHalfDiagonals = (target.collisionBox.halfWidth + this.collisionBox.halfWidth) * Math.sqrt(2)
-    const outerRangeMultiplier = 3
+    const outerRangeMultiplier = 4
     return this.distanceFromTarget < sumOfCollisionBoxHalfDiagonals * outerRangeMultiplier
-    // TODO: Make this function return `false` if there are obstacles between the player & the enemy
   }
 
   protected checkIfStuck(): boolean {
@@ -121,26 +120,18 @@ export default abstract class Enemy extends Creature {
   }
 
   protected attack(p: Player): void {
-    if (this.attackCooldown <= 0) {
-      this.resetAttackCooldown()
+    const targetIsBehindAnObstacle = Raycaster.determineIfThereAreObstaclesBetweenTwoPoints(this, p)
 
-      if (this.targetInEffectiveRange(p)) {
-        SoundFX.playEnemyAttack()
-        this.dealDamage(p)
-      }
-      // If the target is out of effective range, there is a chance
-      // that the attack is a Miss
-      else if (this.attackIsMiss()) {
-        SoundFX.playEnemyAttackMiss()
-        this.dealDamage(p, AttackEdgeCases.Miss)
-      }
-      else { // Attack is not a miss!
-        SoundFX.playEnemyAttack()
-        this.dealDamage(p)
-      }
+    if (
+      this.targetInEffectiveRange(p) &&
+      targetIsBehindAnObstacle === false // Miss when target goes behind an obstacle!
+    ) {
+      SoundFX.playEnemyAttack()
+      this.dealDamage(p)
     }
-    else {
-      this.attackCooldown -= GameTime.frameElapsedTime
+    else { // Attack is a miss!
+      SoundFX.playEnemyAttackMiss()
+      this.dealDamage(p, AttackEdgeCases.Miss)
     }
   }
 
