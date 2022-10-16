@@ -6,6 +6,7 @@ import CollisionBox from '@app/infrastructure/CollisionBox'
 import GAME_STATES from "@app/infrastructure/game/game_states/GameStates"
 import Canvas, { context } from '@app/infrastructure/Canvas'
 
+import AttackEdgeCases from '@app/domain/AttackEdgeCases'
 export interface IWidget {
   update(): void
   render(playerX: number, playerY: number): void
@@ -23,14 +24,15 @@ export class DamageNumberFactory {
     y: number,
     collisionBox: CollisionBox,
     damage: number,
-    color: DamageNumberColors = DamageNumberColors.red
+    color: DamageNumberColors = DamageNumberColors.red,
+    attackEdgeCase: AttackEdgeCases = null,
   ): DamageNumber {
     return new DamageNumber(
       x,
       y - collisionBox.halfHeight * 0.9,
       (Math.random() * collisionBox.height)       - collisionBox.halfHeight,
       (Math.random() * collisionBox.width  / 1.5) - collisionBox.halfWidth / 1.5,
-      damage.toString(),
+      attackEdgeCase ? attackEdgeCase : damage.toString(),
       color
     )
   }

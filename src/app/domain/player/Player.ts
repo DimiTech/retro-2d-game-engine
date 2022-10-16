@@ -11,6 +11,8 @@ import CollisionBox, {
 import { angleBetweenPoints } from '@app/infrastructure/geometry/Point'
 
 import Creature from '@app/domain/Creature'
+import CreatureState from '@app/domain/CreatureState'
+import AttackEdgeCases from '@app/domain/AttackEdgeCases'
 import Map from '@app/domain/map/Map'
 import Crosshair from './Crosshair'
 import Projectile from './Projectile'
@@ -18,7 +20,6 @@ import Projectile from './Projectile'
 import DamageNumbers, { DamageNumberColors, DamageNumberFactory } from '@app/domain/widgets/DamageNumbers'
 
 import SoundFX from '@app/audio/SoundFX'
-import CreatureState from '../CreatureState'
 
 export default class Player extends Creature {
   public alive: boolean = true
@@ -171,11 +172,13 @@ export default class Player extends Creature {
     this.attackCooldown = this.maxAttackCooldown
   }
 
-  public takeDamage(damageAmount: number): void {
+  public takeDamage(damageAmount: number, attackEdgeCase: AttackEdgeCases = null): void {
     this.health = this.health - damageAmount
 
     if (this.widgets.damageNumbers) {
-      this.widgets.damageNumbers.push(DamageNumberFactory.create(this.x, this.y, this.collisionBox, damageAmount, DamageNumberColors.gray))
+      this.widgets.damageNumbers.push(
+        DamageNumberFactory.create(this.x, this.y, this.collisionBox, damageAmount, DamageNumberColors.gray, attackEdgeCase)
+      )
     }
 
     if (this.health <= 0) {

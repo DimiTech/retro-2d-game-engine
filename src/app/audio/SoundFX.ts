@@ -15,6 +15,7 @@ export default class SoundFX {
   private static PLAYER_HIT_READY: boolean = true
 
   private static ENEMY_ATTACK: AudioBuffer[] = []
+  private static ENEMY_ATTACK_MISS: AudioBuffer[] = []
 
   private static ENEMY_HIT: AudioBuffer[] = []
   private static ENEMY_HIT_READY: boolean = true
@@ -41,6 +42,7 @@ export default class SoundFX {
 
       load('./audio/enemy_attack_1.wav'),
       load('./audio/enemy_attack_2.wav'),
+      load('./audio/enemy_attack_miss.wav'),
 
       load('./audio/enemy_hit_1.wav'),
       load('./audio/enemy_hit_2.wav'),
@@ -75,13 +77,15 @@ export default class SoundFX {
     this.ENEMY_ATTACK[0] = soundFxFiles[12]
     this.ENEMY_ATTACK[1] = soundFxFiles[13]
 
-    this.ENEMY_HIT[0] = soundFxFiles[14]
-    this.ENEMY_HIT[1] = soundFxFiles[15]
-    this.ENEMY_HIT[2] = soundFxFiles[16]
+    this.ENEMY_ATTACK_MISS[0] = soundFxFiles[14]
 
-    this.ENEMY_DEATH[0] = soundFxFiles[17]
-    this.ENEMY_DEATH[1] = soundFxFiles[18]
+    this.ENEMY_HIT[0] = soundFxFiles[15]
+    this.ENEMY_HIT[1] = soundFxFiles[16]
+    this.ENEMY_HIT[2] = soundFxFiles[17]
+
+    this.ENEMY_DEATH[0] = soundFxFiles[18]
     this.ENEMY_DEATH[2] = soundFxFiles[19]
+    this.ENEMY_DEATH[2] = soundFxFiles[20]
 
     setLoadedPercentage(1.0)
   }
@@ -138,6 +142,20 @@ export default class SoundFX {
 
     const randomIndex = Math.floor(Math.random() * this.ENEMY_ATTACK.length)
     playSound.buffer = this.ENEMY_ATTACK[randomIndex]
+
+    const gainNode = context.createGain()
+    gainNode.gain.value = Mixer.soundFxVolume
+    playSound.connect(gainNode)
+
+    gainNode.connect(context.destination)
+
+    playSound.start()
+  }
+
+  public static playEnemyAttackMiss(): void {
+    const playSound = context.createBufferSource()
+
+    playSound.buffer = this.ENEMY_ATTACK_MISS[0]
 
     const gainNode = context.createGain()
     gainNode.gain.value = Mixer.soundFxVolume

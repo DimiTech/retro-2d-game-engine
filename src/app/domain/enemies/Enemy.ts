@@ -8,6 +8,7 @@ import CreatureSprite from '@app/graphics/sprites/CreatureSprite'
 import Creature from '@app/domain/Creature'
 import CreatureState from '@app/domain/CreatureState'
 import AnimationState from '@app/domain/AnimationState'
+import AttackEdgeCases from '@app/domain/AttackEdgeCases'
 import Player from '@app/domain/player/Player'
 import Map from '@app/domain/map/Map'
 import DamageNumbers, { DamageNumberFactory } from '@app/domain/widgets/DamageNumbers'
@@ -28,7 +29,8 @@ export default abstract class Enemy extends Creature {
 
   // TODO: Move this to Weapon
   protected readonly attackSpeed: number // seconds
-  protected attackCooldown: number       // ms
+  protected attackCooldown    : number // ms
+  protected maxAttackCooldown : number // ms
 
   protected animations: { [key in CreatureState]?: AnimationState }
 
@@ -101,6 +103,13 @@ export default abstract class Enemy extends Creature {
     return this.distanceFromTarget < sumOfCollisionBoxHalfDiagonals
   }
 
+  protected targetInEffectiveRange(target: Creature) {
+    const sumOfCollisionBoxHalfDiagonals = (target.collisionBox.halfWidth + this.collisionBox.halfWidth) * Math.sqrt(2)
+    const outerRangeMultiplier = 3
+    return this.distanceFromTarget < sumOfCollisionBoxHalfDiagonals * outerRangeMultiplier
+    // TODO: Make this function return `false` if there are obstacles between the player & the enemy
+  }
+
   protected checkIfStuck(): boolean {
     const xIsStatic = this.prevX.every((x) => x === this.prevX[0])
     const yIsStatic = this.prevY.every((y) => y === this.prevY[0])
@@ -115,15 +124,32 @@ export default abstract class Enemy extends Creature {
     if (this.attackCooldown <= 0) {
       this.resetAttackCooldown()
 
-      SoundFX.playEnemyAttack()
-      this.dealDamage(p)
-    } else {
+      if (this.targetInEffectiveRange(p)) {
+        SoundFX.playEnemyAttack()
+        this.dealDamage(p)
+      }
+      // If the target is out of effective range, there is a chance
+      // that the attack is a Miss
+      else if (this.attackIsMiss()) {
+        SoundFX.playEnemyAttackMiss()
+        this.dealDamage(p, AttackEdgeCases.Miss)
+      }
+      else { // Attack is not a miss!
+        SoundFX.playEnemyAttack()
+        this.dealDamage(p)
+      }
+    }
+    else {
       this.attackCooldown -= GameTime.frameElapsedTime
     }
   }
 
+  protected attackIsMiss(): boolean {
+    return Math.random() >= 0.7
+  }
+
   protected resetAttackCooldown() {
-    this.attackCooldown = (1000 * this.attackSpeed) / CONFIG.GAME_SPEED
+    this.attackCooldown = this.maxAttackCooldown
   }
 
   public takeDamage(damageAmount: number): void {
@@ -144,8 +170,13 @@ export default abstract class Enemy extends Creature {
     this.setState(CreatureState.Dying)
   }
 
-  protected dealDamage(p: Player) {
-    p.takeDamage(this.getDamage())
+  protected dealDamage(p: Player, attackEdgeCase: AttackEdgeCases = null) {
+    if (attackEdgeCase === AttackEdgeCases.Miss) {
+      p.takeDamage(0, attackEdgeCase)
+    }
+    else {
+      p.takeDamage(this.getDamage())
+    }
   }
 
   // TODO: Implement damage range
