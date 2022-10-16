@@ -28,6 +28,8 @@ export default class ConcreteEnemy extends Enemy {
   // TODO: Adjust the feeling of enemy attack & animation
   protected attackSpeed = 0.45 // seconds
 
+  protected maxAttackCooldown: number = (1000 * this.attackSpeed) / CONFIG.GAME_SPEED
+
   constructor(
     x: number,
     y: number,
@@ -89,9 +91,14 @@ export default class ConcreteEnemy extends Enemy {
     }
 
     if (this.state === CreatureState.Attacking) {
-      if (targetIsInRange) {
-        this.attack(player)
-      } else {
+      this.attack(player)
+
+      const attackInProgress = this.attackCooldown !== this.maxAttackCooldown
+
+      if (
+        targetIsInRange  === false &&
+        attackInProgress === false
+      ) {
         this.setState(CreatureState.Moving)
       }
     }
