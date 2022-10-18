@@ -34,7 +34,7 @@ export default class Portal extends PortalObject {
         this.y,
         CONFIG.TILE_SIZE,
         CONFIG.TILE_SIZE
-      );
+      )
     context.fill()
   }
 

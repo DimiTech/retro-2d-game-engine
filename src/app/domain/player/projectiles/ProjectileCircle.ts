@@ -3,10 +3,10 @@ import Canvas, { context } from '@app/infrastructure/Canvas'
 import Projectile from './Projectile'
 
 export default class ProjectileCircle extends Projectile {
-  public speed: number = 24
-  public minDamage: number = 6
-  public maxDamage: number = 12
-  public alive: boolean = true
+  public speed     = 24
+  public minDamage = 6
+  public maxDamage = 12
+  public alive     = true
 
   constructor(
     x: number,

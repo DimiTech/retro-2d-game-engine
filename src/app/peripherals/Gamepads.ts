@@ -11,7 +11,7 @@ export default class Gamepads {
     }
   }
 
-  private static aimModifier: number = 10
+  private static aimModifier = 10
 
   private static handleMovement(gamepad: any, player: Player): void {
     const movementAxisX: number = +gamepad.axes[0].toFixed(2)

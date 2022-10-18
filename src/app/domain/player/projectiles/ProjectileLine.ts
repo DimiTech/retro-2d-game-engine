@@ -3,10 +3,10 @@ import Canvas, { context } from '@app/infrastructure/Canvas'
 import Projectile from './Projectile'
 
 export default class ProjectileLine extends Projectile {
-  public speed: number = 24
-  public minDamage: number = 2
-  public maxDamage: number = 6
-  public alive: boolean = true
+  public speed     = 24
+  public minDamage = 2
+  public maxDamage = 6
+  public alive     = true
 
   constructor(
     x: number,

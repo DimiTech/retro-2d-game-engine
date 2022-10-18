@@ -1,12 +1,11 @@
 import Canvas, { context } from '@app/infrastructure/Canvas'
 import Point from '@app/infrastructure/geometry/Point'
-import CreatureState from '@app/domain/CreatureState'
 
 import CreatureSprite from './CreatureSprite'
 import Creature from '@app/domain/Creature'
 
 export default class DecaySprite extends CreatureSprite {
-  public url: string = './graphics/spritesheets/decay.png'
+  public url = './graphics/spritesheets/decay.png'
 
 
   private spriteProperties = {

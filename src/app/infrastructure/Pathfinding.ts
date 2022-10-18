@@ -178,9 +178,9 @@ export class PathNode implements RaycastablePoint {
   }
   public collisionBox: CollisionBox
 
-  public visited: boolean = false
-  public g: number = Infinity // Global goal
-  public f: number = Infinity // Local goal
+  public visited = false
+  public g = Infinity // Global goal
+  public f = Infinity // Local goal
   public parent: PathNode = null
   public neighbourNodes: PathNode[]
 

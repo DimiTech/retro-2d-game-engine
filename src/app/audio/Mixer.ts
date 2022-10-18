@@ -1,6 +1,6 @@
 export default class Mixer {
-  private static _musicVolume   : number = 0.3
-  private static _soundFxVolume : number = 0.15
+  private static _musicVolume   = 0.3
+  private static _soundFxVolume = 0.15
 
   public static get musicVolume(): number {
     return this._musicVolume

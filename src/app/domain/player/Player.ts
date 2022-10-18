@@ -281,7 +281,7 @@ export default class Player extends Creature {
     context.beginPath()
       context.fillStyle = '#DD0000'
       context.font = '8px Monospace'
-      const [ equippedWeaponIndex ] = Object.entries(this.AvailableWeapons).find(([_, w]) => w === this.equipedWeapon)
+      const [ equippedWeaponIndex ] = Object.entries(this.AvailableWeapons).find(([, w]) => w === this.equipedWeapon)
       context.fillText(`Weapon: ${equippedWeaponIndex}`, 10, CONFIG.CANVAS_HEIGHT - 36)
     context.stroke()
   }

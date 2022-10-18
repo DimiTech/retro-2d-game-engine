@@ -6,7 +6,7 @@ import CreatureSprite from './CreatureSprite'
 import Creature from '@app/domain/Creature'
 
 export default class ZergSprite extends CreatureSprite {
-  public url: string = './graphics/spritesheets/zergling.png'
+  public url = './graphics/spritesheets/zergling.png'
 
   private spriteLocations: { [key: string]: { col: number, flip: boolean } } = {
     N : { col: 0, flip: false },

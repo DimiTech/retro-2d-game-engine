@@ -12,13 +12,13 @@ export default class SoundFX {
 
   private static PLAYER_HIT: AudioBuffer[] = []
   private static PLAYER_HIT_INDEX = 0
-  private static PLAYER_HIT_READY: boolean = true
+  private static PLAYER_HIT_READY = true
 
   private static ENEMY_ATTACK: AudioBuffer[] = []
   private static ENEMY_ATTACK_MISS: AudioBuffer[] = []
 
   private static ENEMY_HIT: AudioBuffer[] = []
-  private static ENEMY_HIT_READY: boolean = true
+  private static ENEMY_HIT_READY = true
 
   private static ENEMY_DEATH: AudioBuffer[] = []
 

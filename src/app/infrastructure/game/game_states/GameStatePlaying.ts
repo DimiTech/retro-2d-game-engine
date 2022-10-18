@@ -103,10 +103,10 @@ export default class GameStatePlaying implements IGameState {
     this.player = null
   }
 
-  public playerSetShootingTrue = (e: MouseEvent) => {
+  public playerSetShootingTrue = () => {
     this.player.setShooting(true) // TODO: Move to state: player.setState(CreatureState.Attacking)
   }
-  public playerSetShootingFalse = (e: MouseEvent) => {
+  public playerSetShootingFalse = () => {
     this.player.setShooting(false)
   }
 

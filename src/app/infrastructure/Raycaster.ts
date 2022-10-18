@@ -51,7 +51,7 @@ export default class Raycaster {
     }
   }
 
-  public static drawRay(hitPoint: Point, color: string = '#4444FF'): void {
+  public static drawRay(hitPoint: Point, color = '#4444FF'): void {
     context.strokeStyle = color
     context.lineWidth = 0.2
     context.beginPath()

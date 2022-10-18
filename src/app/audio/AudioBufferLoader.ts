@@ -1,7 +1,7 @@
 import context from './AudioContext'
 
 export function load(URI: string): Promise<AudioBuffer> {
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     const request = new XMLHttpRequest()
     request.open('GET', URI, true)
     request.responseType = 'arraybuffer'

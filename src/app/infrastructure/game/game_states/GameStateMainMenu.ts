@@ -10,9 +10,9 @@ import IGameState from './IGameState'
 import GAME_STATES from './GameStates'
 
 export default class GameStateMainMenu implements IGameState {
-  private animationProgress: number = 0
+  private animationProgress = 0
   private animationLength: number = GameTime.ONE_SECOND
-  private instructionsVisible: boolean = true
+  private instructionsVisible = true
 
   public enter(): void {
     window.addEventListener('keydown', this.handleMenuSelection)

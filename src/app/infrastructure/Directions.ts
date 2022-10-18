@@ -1,4 +1,4 @@
-import { Pi2Decimals, radiansToDegrees } from '@app/infrastructure/math/MathUtils'
+import { radiansToDegrees } from '@app/infrastructure/math/MathUtils'
 
 export enum Directions {
   N  = 'N',
@@ -52,7 +52,7 @@ export function getDirectionBasedOnAngle(theta: number): Directions {
     return Directions.E
   }
 
-  const [ direction ] = Object.entries(directionsAngleRangesLUT).find(([direction, angleRange]) => {
+  const [ direction ] = Object.entries(directionsAngleRangesLUT).find(([, angleRange]) => {
     return (theta >= angleRange.min && theta < angleRange.max)
   })
   return Directions[direction as Directions]

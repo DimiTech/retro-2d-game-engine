@@ -20,8 +20,8 @@ export default abstract class Enemy extends Creature {
 
   protected distanceFromTarget: number
   protected thereAreObstaclesBetweenPlayerAndThisEnemy: boolean
-  protected pathfindingTimer: number = 0
-  protected pathfindingInterval: number = 500 // ms
+  protected pathfindingTimer    = 0
+  protected pathfindingInterval = 500 // ms
   protected pathfindingNodes: PathNode[]
   protected shortestPath: PathNode[] = []
 

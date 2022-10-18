@@ -1,9 +1,9 @@
 import * as CONFIG from '@app/configuration/config.json'
 
-import Game from "@app/infrastructure/game/Game"
+import Game from '@app/infrastructure/game/Game'
 import GameTime from '@app/infrastructure/GameTime'
 import CollisionBox from '@app/infrastructure/CollisionBox'
-import GAME_STATES from "@app/infrastructure/game/game_states/GameStates"
+import GAME_STATES from '@app/infrastructure/game/game_states/GameStates'
 import Canvas, { context } from '@app/infrastructure/Canvas'
 
 import AttackEdgeCases from '@app/domain/AttackEdgeCases'
@@ -72,7 +72,7 @@ class DamageNumber {
   private fontSize = 8
   private font = `${this.fontSize}px Monospace`
   private fontWidth = this.fontSize / 2
-  private damageTextHalfWidth: number = 0
+  private damageTextHalfWidth = 0
 
   public draw(playerX: number, playerY: number) {
     context.beginPath()

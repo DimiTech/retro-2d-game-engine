@@ -1,4 +1,4 @@
-import Point from "@app/infrastructure/geometry/Point"
+import Point from '@app/infrastructure/geometry/Point'
 
 export default interface IMap {
   player: Point,

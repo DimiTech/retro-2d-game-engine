@@ -29,7 +29,7 @@ export default abstract class Creature {
   public state: CreatureState = CreatureState.Idling
   public previousState: CreatureState = CreatureState.Idling // TODO: Use `previousState` for something? (Currently it's unused)
 
-  public animationSpritePosition: number = 0
+  public animationSpritePosition = 0
 
   public direction: Directions
 
@@ -426,7 +426,7 @@ export default abstract class Creature {
     }
   }
 
-  protected initializeHealth(healthPercentage: number = 1.0): void {
+  protected initializeHealth(healthPercentage = 1.0): void {
     if (healthPercentage < 0.0 || healthPercentage > 1.0) {
       healthPercentage = 1.0
     }

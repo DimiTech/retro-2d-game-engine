@@ -8,7 +8,7 @@ export default abstract class CreatureSprite {
   public abstract draw(c: Creature, playerCoordinates: Point, animationSpritePosition?: number): void
 
   public load(callback: () => void): Promise<void> {
-    return new Promise((resolve, _reject) => {
+    return new Promise((resolve) => {
       this.spriteSheet = new Image()
       this.spriteSheet.src = this.url
       this.spriteSheet.onload = () => {

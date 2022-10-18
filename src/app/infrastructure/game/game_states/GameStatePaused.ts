@@ -43,7 +43,7 @@ export default class GameStatePaused implements IGameState {
       context.fillStyle = '#FFC100'
       context.font = '20px Monospace'
 
-      context.fillText(`Paused`, CONFIG.CANVAS_WIDTH / 2 - 36, CONFIG.CANVAS_HEIGHT / 2 - 54)
+      context.fillText('Paused', CONFIG.CANVAS_WIDTH / 2 - 36, CONFIG.CANVAS_HEIGHT / 2 - 54)
       context.font = '12px Monospace'
       context.fillText('  p - Resume',    CONFIG.CANVAS_WIDTH / 2 - 50, CONFIG.CANVAS_HEIGHT / 2 - 34)
       context.fillText('ESC - Main Menu', CONFIG.CANVAS_WIDTH / 2 - 50, CONFIG.CANVAS_HEIGHT / 2 - 18)

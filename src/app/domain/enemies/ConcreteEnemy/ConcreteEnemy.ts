@@ -388,7 +388,7 @@ export default class ConcreteEnemy extends Enemy {
 
   private debug_drawShortestPathToPlayer(p: Player) {
     this.shortestPath
-      .forEach((n, i) => {
+      .forEach((n) => {
         drawNode(n, p, n.visited ? '#FF0000' : '#FF00FF')
       })
     if (this.shortestPath.length > 0) {

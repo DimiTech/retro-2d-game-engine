@@ -30,7 +30,7 @@ export default abstract class Projectile {
   /*
    * Intermediate positions/points solve the bullet phasing problem
    */
-  protected numberOfIntermediatePositions: number = 3 // More intermediate points give more precision, 3 are just fine
+  protected numberOfIntermediatePositions = 3 // More intermediate points give more precision, 3 are just fine
   protected intermediatePositions: IntermediatePoint[] = []
 
   constructor(
@@ -108,7 +108,7 @@ export default abstract class Projectile {
 
   protected checkCollisionWithEnemies(nearbyEnemies: Enemy[], point?: Point): void {
     if (!point) {
-      point = this
+      point = this as Point
     }
 
     nearbyEnemies.forEach(e => {
@@ -131,7 +131,7 @@ export default abstract class Projectile {
 
   protected checkCollisionWithWall(point?: Point): void {
     if (!point) {
-      point = this
+      point = this as Point
     }
 
     const wall = Map.walls[point.row][point.col]

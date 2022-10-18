@@ -11,8 +11,8 @@ import GameTime from '../GameTime'
 import FrameRate from '../FrameRate'
 
 export default class Game {
-  public static loaded: boolean = false
-  public static loadedPercentage: number = 0.0
+  public static loaded = false
+  public static loadedPercentage = 0.0
   public static loadedPercentages: Map<GameAssets, { loaded: number, weight: number }> = new Map()
 
   public static stateManager: GameStateManager = new GameStateManager()
@@ -46,7 +46,7 @@ export default class Game {
     Game.loadedPercentages.set(asset, assetValue)
 
     Game.loadedPercentage = 0
-    for (const [_key, value] of Game.loadedPercentages) {
+    for (const [, value] of Game.loadedPercentages) {
       Game.loadedPercentage += value.loaded * value.weight
     }
 
