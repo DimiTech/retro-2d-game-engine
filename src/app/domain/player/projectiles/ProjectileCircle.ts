@@ -4,7 +4,8 @@ import Projectile from './Projectile'
 
 export default class ProjectileCircle extends Projectile {
   public speed: number = 24
-  public damage: number = 10
+  public minDamage: number = 6
+  public maxDamage: number = 12
   public alive: boolean = true
 
   constructor(

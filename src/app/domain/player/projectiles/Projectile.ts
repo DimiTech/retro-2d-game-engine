@@ -6,6 +6,7 @@ import Point from '@app/infrastructure/geometry/Point'
 import Map from '@app/domain/map/Map'
 import Enemy from '@app/domain/enemies/Enemy'
 import CreatureState from '@app/domain/CreatureState'
+import { randomInRange } from '@app/infrastructure/math/MathUtils'
 
 interface IntermediatePoint {
   x: number
@@ -16,7 +17,8 @@ interface IntermediatePoint {
 
 export default abstract class Projectile {
   public speed: number
-  public damage: number
+  public minDamage: number
+  public maxDamage: number
   public alive: boolean
   public row: number
   public col: number
@@ -143,6 +145,6 @@ export default abstract class Projectile {
   }
 
   protected getDamage(): number {
-    return this.damage // TODO: Implement damage range here!
+    return randomInRange(this.minDamage, this.maxDamage)
   }
 }
