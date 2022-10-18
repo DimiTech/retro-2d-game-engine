@@ -13,6 +13,7 @@
     "SHORTEST_PATH_TO_PLAYER": false,
     "PLAYER_COLLISION_BOX": true,
     "PLAYER_VISION_RAY_SHOTGUN": false,
+    "PLAYER_WEAPON_DISPLAY": true,
     "ENEMY_COLLISION_BOX": true,
     "ENEMY_STATE": true
   },

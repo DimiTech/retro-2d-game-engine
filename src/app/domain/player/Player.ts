@@ -168,6 +168,10 @@ export default class Player extends Creature {
     }
 
     Object.values(this.widgets).forEach(widget => widget.render(this.x, this.y)) // Render widgets
+
+    if (CONFIG.DEBUG.PLAYER_WEAPON_DISPLAY) {
+      this.debug_drawWeaponDisplay()
+    }
   }
 
   private drawPlayerVisionRays(theta: number) {
@@ -270,6 +274,15 @@ export default class Player extends Creature {
       -0.5 + Canvas.center.x - this.collisionBox.halfWidth,
       -0.5 + Canvas.center.y - this.collisionBox.halfHeight,
     )
+    context.stroke()
+  }
+
+  private debug_drawWeaponDisplay() {
+    context.beginPath()
+      context.fillStyle = '#DD0000'
+      context.font = '8px Monospace'
+      const [ equippedWeaponIndex ] = Object.entries(this.AvailableWeapons).find(([_, w]) => w === this.equipedWeapon)
+      context.fillText(`Weapon: ${equippedWeaponIndex}`, 10, CONFIG.CANVAS_HEIGHT - 36)
     context.stroke()
   }
 }
