@@ -24,8 +24,8 @@ import DamageNumbers, { DamageNumberColors, DamageNumberFactory } from '@app/dom
 import SoundFX from '@app/audio/SoundFX'
 
 export default class Player extends Creature {
-  public alive: boolean = true
-  public rotation: number = 0
+  public alive = true
+  public rotation = 0
   public sightLineLength = 10
 
   private AvailableWeapons: { [key: number]: RangedWeapon } = {
