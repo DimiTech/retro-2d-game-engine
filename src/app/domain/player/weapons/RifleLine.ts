@@ -2,6 +2,8 @@ import * as CONFIG from '@app/configuration/config.json'
 
 import ProjectileLine from '@app/domain/player/projectiles/ProjectileLine'
 
+import SoundFX from '@app/audio/SoundFX'
+
 import RangedWeapon from './RangedWeapon'
 
 export default class RifleLine extends RangedWeapon {
@@ -11,4 +13,8 @@ export default class RifleLine extends RangedWeapon {
   protected maxCooldown = (1000 * this.firingSpeed) / CONFIG.GAME_SPEED
 
   protected projectileConstructor = ProjectileLine
+
+  protected playShootSFX() {
+    SoundFX.playSMG()
+  }
 }

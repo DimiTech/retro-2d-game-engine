@@ -1,11 +1,9 @@
 import * as CONFIG from '@app/configuration/config.json'
 
-import Canvas from "@app/infrastructure/Canvas"
-import GameTime from "@app/infrastructure/GameTime"
+import Canvas from '@app/infrastructure/Canvas'
+import GameTime from '@app/infrastructure/GameTime'
 
-import Projectile from "../projectiles/Projectile"
-
-import SoundFX from "@app/audio/SoundFX"
+import Projectile from '@app/domain/player/projectiles/Projectile'
 
 export default abstract class RangedWeapon {
   // TODO: Adjust for attack feeling
@@ -14,6 +12,8 @@ export default abstract class RangedWeapon {
   protected maxCooldown : number // ms
 
   protected shooting = false
+
+  protected abstract playShootSFX(): void
 
   protected projectileConstructor: new (
     x: number,
@@ -62,7 +62,7 @@ export default abstract class RangedWeapon {
       this.fireProjectile(playerX, playerY)
       this.resetAttackCooldown()
 
-      SoundFX.playSMG()
+      this.playShootSFX()
     }
   }
 
