@@ -26,6 +26,11 @@ export default abstract class RangedWeapon {
 
   public update(playerX: number, playerY: number) {
     this.shoot(playerX, playerY)
+
+    if (!this.projectiles.length) {
+      return
+    }
+
     this.projectiles.forEach((p, i) => {
       p.update(playerX, playerY)
       if (p.alive === false) {
@@ -35,7 +40,9 @@ export default abstract class RangedWeapon {
   }
 
   public draw(playerX: number, playerY: number): void {
-    this.projectiles.forEach((p) => p.draw(playerX, playerY))
+    if (this.projectiles.length) {
+      this.projectiles.forEach((p) => p.draw(playerX, playerY))
+    }
   }
 
   public shoot(playerX: number, playerY: number): void {
