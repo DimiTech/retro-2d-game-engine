@@ -3,7 +3,6 @@ import * as CONFIG from '@app/configuration/config.json'
 import { KEYBOARD_KEYS } from '@app/peripherals/constants/KeyCodes'
 
 import Canvas, { context } from '@app/infrastructure/Canvas'
-import GameTime from '@app/infrastructure/GameTime'
 import Raycaster from '@app/infrastructure/Raycaster'
 import CollisionBox, {
   collisionBoxesIntersect,
@@ -14,8 +13,11 @@ import Creature from '@app/domain/Creature'
 import CreatureState from '@app/domain/CreatureState'
 import AttackEdgeCases from '@app/domain/AttackEdgeCases'
 import Map from '@app/domain/map/Map'
+
 import Crosshair from './Crosshair'
-import Projectile from './Projectile'
+import RangedWeapon from './weapons/RangedWeapon'
+import RifleLine from './weapons/RifleLine'
+import RifleCircle from './weapons/RifleCircle'
 
 import DamageNumbers, { DamageNumberColors, DamageNumberFactory } from '@app/domain/widgets/DamageNumbers'
 
@@ -25,14 +27,13 @@ export default class Player extends Creature {
   public alive: boolean = true
   public rotation: number = 0
   public sightLineLength = 10
-  private shooting = false
 
-  // TODO: Adjust for attack feeling
-  private attackSpeed = 0.1 // seconds
-  private attackCooldown = 0
-  private maxAttackCooldown = (1000 * this.attackSpeed) / CONFIG.GAME_SPEED
+  private AvailableWeapons: { [key: number]: RangedWeapon } = {
+    1: new RifleCircle(),
+    2: new RifleLine(),
+  }
 
-  private projectiles: Projectile[] = []
+  private equipedWeapon: RangedWeapon = this.AvailableWeapons[1]
 
   constructor(public x: number, public y: number) {
     super(x, y, new CollisionBox(12, 12), 0.18, 1)
@@ -52,48 +53,23 @@ export default class Player extends Creature {
     this.adjustCollisionWithWalls() // Must come after move()
     this.updateTileDeltas()         // Must come after adjustCollisionWithWalls()
     this.updateMapPosition()        // Must come after adjustCollisionWithWalls()
-    this.shoot()
-    this.projectiles.forEach((p, i) => {
-      p.update(this.x, this.y)
-      if (p.alive === false) {
-        this.projectiles.splice(i, 1) // Remove the projectile
-      }
-    })
+
+    Object.values(this.AvailableWeapons).forEach(w => w.update(this.x, this.y))
+
     Object.values(this.widgets).forEach(widget => widget.update()) // Update widgets
   }
 
   public draw(): void {
     const theta = this.calculateTheta()
     this.drawPlayer(theta)
-    this.drawPlayerVisionRay(theta)
-
-    // TODO: Just for testing purposes. Delete this.
-    if (CONFIG.DEBUG.PLAYER_VISION_RAY_SHOTGUN) {
-      this.drawPlayerVisionRay(theta - 0.45)
-      this.drawPlayerVisionRay(theta - 0.4)
-      this.drawPlayerVisionRay(theta - 0.35)
-      this.drawPlayerVisionRay(theta - 0.3)
-      this.drawPlayerVisionRay(theta - 0.25)
-      this.drawPlayerVisionRay(theta - 0.2)
-      this.drawPlayerVisionRay(theta - 0.15)
-      this.drawPlayerVisionRay(theta - 0.1)
-      this.drawPlayerVisionRay(theta - 0.05)
-      this.drawPlayerVisionRay(theta + 0.05)
-      this.drawPlayerVisionRay(theta + 0.1)
-      this.drawPlayerVisionRay(theta + 0.15)
-      this.drawPlayerVisionRay(theta + 0.2)
-      this.drawPlayerVisionRay(theta + 0.25)
-      this.drawPlayerVisionRay(theta + 0.3)
-      this.drawPlayerVisionRay(theta + 0.35)
-      this.drawPlayerVisionRay(theta + 0.4)
-      this.drawPlayerVisionRay(theta + 0.45)
-    }
+    this.drawPlayerVisionRays(theta)
 
     Crosshair.draw()
-    this.drawProjectiles()
+
+    Object.values(this.AvailableWeapons).forEach(w => w.draw(this.x, this.y))
   }
 
-  public keydownHandler = (e: KeyboardEvent) => {
+  private _keydownHandler = (e: KeyboardEvent) => {
     switch (e.keyCode) {
       case KEYBOARD_KEYS.w:
         this.moving.up = true
@@ -111,7 +87,19 @@ export default class Player extends Creature {
         this.moving.right = true
         this.movingDirections.right = true
         break
+      case KEYBOARD_KEYS[1]:
+        this.switchWeapons(1)
+        break
+      case KEYBOARD_KEYS[2]:
+        this.switchWeapons(2)
+        break
     }
+  }
+  public get keydownHandler() {
+    return this._keydownHandler
+  }
+  public set keydownHandler(value) {
+    this._keydownHandler = value
   }
   public keyupHandler = (e: KeyboardEvent) => {
     switch (e.keyCode) {
@@ -128,48 +116,6 @@ export default class Player extends Creature {
         this.moving.right = false
         break
       }
-  }
-
-  public setShooting(isShooting: boolean): void {
-    this.shooting = isShooting
-  }
-
-  public shoot(): void {
-    if (this.attackCooldown >= 0) {
-      this.attackCooldown -= GameTime.frameElapsedTime
-      if (this.attackCooldown < 0) {
-        this.attackCooldown = 0
-      }
-    }
-
-    if (this.shooting === false) {
-      return
-    }
-
-    if (this.attackCooldown <= 0) {
-      const dx = Canvas.mousePosition.x - Canvas.center.x
-      const dy = Canvas.mousePosition.y - Canvas.center.y
-      let xVel = dx / (Math.abs(dx) + Math.abs(dy))
-      let yVel = dy / (Math.abs(dx) + Math.abs(dy))
-
-      // TODO: GAME FEATURE: Insert accuracy skill to reduce bullet motion randomness
-      // TODO: Fix the problem with different bullet speeds caused by randomness
-      if (CONFIG.FEATURES.SCATTER_PROJECTILES) {
-        const randomFactorX = Math.random() * 0.1 - 0.05
-        const randomFactorY = Math.random() * 0.1 - 0.05
-        xVel += randomFactorX
-        yVel += randomFactorY
-      }
-
-      this.projectiles.push(new Projectile(this.x, this.y, xVel, yVel))
-      this.resetAttackCooldown()
-
-      SoundFX.playSMG()
-    }
-  }
-
-  protected resetAttackCooldown() {
-    this.attackCooldown = this.maxAttackCooldown
   }
 
   public takeDamage(damageAmount: number, attackEdgeCase: AttackEdgeCases = null): void {
@@ -224,6 +170,79 @@ export default class Player extends Creature {
     Object.values(this.widgets).forEach(widget => widget.render(this.x, this.y)) // Render widgets
   }
 
+  private drawPlayerVisionRays(theta: number) {
+    this.drawPlayerVisionRay(theta)
+
+    // TODO: Just for testing purposes. Delete this.
+    if (CONFIG.DEBUG.PLAYER_VISION_RAY_SHOTGUN) {
+      this.drawPlayerVisionRay(theta - 0.45)
+      this.drawPlayerVisionRay(theta - 0.4)
+      this.drawPlayerVisionRay(theta - 0.35)
+      this.drawPlayerVisionRay(theta - 0.3)
+      this.drawPlayerVisionRay(theta - 0.25)
+      this.drawPlayerVisionRay(theta - 0.2)
+      this.drawPlayerVisionRay(theta - 0.15)
+      this.drawPlayerVisionRay(theta - 0.1)
+      this.drawPlayerVisionRay(theta - 0.05)
+      this.drawPlayerVisionRay(theta + 0.05)
+      this.drawPlayerVisionRay(theta + 0.1)
+      this.drawPlayerVisionRay(theta + 0.15)
+      this.drawPlayerVisionRay(theta + 0.2)
+      this.drawPlayerVisionRay(theta + 0.25)
+      this.drawPlayerVisionRay(theta + 0.3)
+      this.drawPlayerVisionRay(theta + 0.35)
+      this.drawPlayerVisionRay(theta + 0.4)
+      this.drawPlayerVisionRay(theta + 0.45)
+    }
+  }
+
+  private drawPlayerVisionRay(theta: number) {
+    const { hitPoint, wallHit } = Raycaster.cast(this, theta)
+    if (hitPoint) {
+      if (wallHit) {
+        Raycaster.drawRay(hitPoint, '#FF4444')
+      } else {
+        Raycaster.drawRay(hitPoint)
+      }
+    }
+  }
+
+  private checkForCollisionWithEnemies(): void { // TODO: Extract to Creature?
+    const nextPlayerState = {
+      x: this.nextX,
+      y: this.nextY,
+      collisionBox: this.collisionBox,
+    }
+    const enemiesOnScreen = Map.getEnemiesOnScreen(this.x, this.y)
+
+    if (
+      enemiesOnScreen.some((e) => collisionBoxesIntersect(e, nextPlayerState))
+    ) {
+      enemiesOnScreen.forEach((e) => {
+        if (e.state >= CreatureState.Dying) {
+          return
+        }
+        this.checkIfBlockedByCreature(e, nextPlayerState)
+      })
+    }
+  }
+
+  public setShooting(isShooting: boolean): void {
+    Object.values(this.AvailableWeapons).forEach(w => w.setShooting(false))
+    this.equipedWeapon.setShooting(isShooting)
+  }
+
+  private switchWeapons(weaponIndex: number) {
+    this.equipedWeapon = this.AvailableWeapons[weaponIndex]
+  }
+
+  private die(): void {
+    // TODO: Re-use CreatureState
+    this.alive = false
+
+    SoundFX.playPlayerDeath()
+  }
+
   private debug_drawCollisionBox() {
     context.strokeStyle = this.getHealthColor()
 
@@ -252,47 +271,5 @@ export default class Player extends Creature {
       -0.5 + Canvas.center.y - this.collisionBox.halfHeight,
     )
     context.stroke()
-  }
-
-  private drawPlayerVisionRay(theta: number) {
-    const { hitPoint, wallHit } = Raycaster.cast(this, theta)
-    if (hitPoint) {
-      if (wallHit) {
-        Raycaster.drawRay(hitPoint, '#FF4444')
-      } else {
-        Raycaster.drawRay(hitPoint)
-      }
-    }
-  }
-
-  private drawProjectiles() {
-    this.projectiles.forEach((p) => p.draw(this.x, this.y))
-  }
-
-  private checkForCollisionWithEnemies(): void { // TODO: Extract to Creature?
-    const nextPlayerState = {
-      x: this.nextX,
-      y: this.nextY,
-      collisionBox: this.collisionBox,
-    }
-    const enemiesOnScreen = Map.getEnemiesOnScreen(this.x, this.y)
-
-    if (
-      enemiesOnScreen.some((e) => collisionBoxesIntersect(e, nextPlayerState))
-    ) {
-      enemiesOnScreen.forEach((e) => {
-        if (e.state >= CreatureState.Dying) {
-          return
-        }
-        this.checkIfBlockedByCreature(e, nextPlayerState)
-      })
-    }
-  }
-
-  private die(): void {
-    // TODO: Re-use CreatureState
-    this.alive = false
-
-    SoundFX.playPlayerDeath()
   }
 }

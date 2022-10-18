@@ -6,6 +6,8 @@ import Map from '@app/domain/map/Map'
 import Enemy from '@app/domain/enemies/Enemy'
 import CreatureState from '@app/domain/CreatureState'
 
+import Projectile from './Projectile'
+
 interface IntermediatePoint {
   x: number
   y: number
@@ -13,14 +15,12 @@ interface IntermediatePoint {
   col: number
 }
 
-export default class Projectile {
+// TODO: Extract as much as possible to the base Projectile class...
+
+export default class ProjectileCircle extends Projectile {
   public speed: number = 24
-  public damage: number = 10
+  public damage: number = 5
   public alive: boolean = true
-  public row: number
-  public col: number
-  private previousX: number
-  private previousY: number
 
   /*
    * Intermediate positions/points solve the bullet phasing problem
@@ -29,11 +29,12 @@ export default class Projectile {
   private intermediatePositions: IntermediatePoint[] = []
 
   constructor(
-    public x: number,
-    public y: number,
-    public directionX: number,
-    public directionY: number,
+    x: number,
+    y: number,
+    directionX: number,
+    directionY: number,
   ) {
+    super(x, y, directionX, directionY)
     for (let i = 0; i < this.numberOfIntermediatePositions; ++i) {
       this.intermediatePositions[i] = { x: null, y: null, row: null, col: null }
     }
@@ -78,7 +79,7 @@ export default class Projectile {
     context.arc(
       this.x + Canvas.center.x - playerX,
       this.y + Canvas.center.y - playerY,
-      2,
+      0.7,
       0,
       (2 * Math.PI)
     )
@@ -120,7 +121,7 @@ export default class Projectile {
     )
   }
 
-  private checkCollisionWithEnemies(nearbyEnemies: Enemy[], point?: IntermediatePoint | Projectile): void {
+  private checkCollisionWithEnemies(nearbyEnemies: Enemy[], point?: IntermediatePoint | ProjectileCircle): void {
     if (!point) {
       point = this
     }
@@ -143,7 +144,7 @@ export default class Projectile {
     })
   }
 
-  private checkCollisionWithWall(point?: IntermediatePoint | Projectile): void {
+  private checkCollisionWithWall(point?: IntermediatePoint | ProjectileCircle): void {
     if (!point) {
       point = this
     }

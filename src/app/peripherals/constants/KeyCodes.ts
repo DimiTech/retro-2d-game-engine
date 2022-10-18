@@ -6,4 +6,6 @@ export const KEYBOARD_KEYS = {
   s: 83,
   d: 68,
   p: 80,
+  1: 49,
+  2: 50,
 }
