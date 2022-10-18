@@ -29,6 +29,8 @@ export default abstract class Enemy extends Creature {
 
   // TODO: Move this to Weapon
   protected readonly attackSpeed: number // seconds
+  protected attackTime      : number // ms
+  protected maxAttackTime   : number // ms
   protected attackCooldown    : number // ms
   protected maxAttackCooldown : number // ms
 
@@ -42,9 +44,6 @@ export default abstract class Enemy extends Creature {
     healthPercentage: number,
   ) {
     super(x, y, collisionBox, speed, healthPercentage)
-
-    // TODO: Move this function to Weapon
-    this.resetAttackCooldown()
 
     // Widgets
     this.widgets.damageNumbers = new DamageNumbers()
@@ -69,7 +68,7 @@ export default abstract class Enemy extends Creature {
     )
   }
 
-  protected abstract advanceAnimation(): void
+  protected abstract advanceAnimation(targetIsInRange: boolean): void
 
   protected checkForCollisionWithPlayer(player: Player): void {
     const nextEnemyState = {
@@ -139,6 +138,9 @@ export default abstract class Enemy extends Creature {
     return Math.random() >= 0.7
   }
 
+  protected resetAttackTime() {
+    this.attackTime = this.maxAttackTime
+  }
   protected resetAttackCooldown() {
     this.attackCooldown = this.maxAttackCooldown
   }

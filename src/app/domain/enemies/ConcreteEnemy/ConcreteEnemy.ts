@@ -16,7 +16,9 @@ import Enemy from '@app/domain/enemies/Enemy'
 import {
   ConcreteEnemyAnimationIdling,
   ConcreteEnemyAnimationMoving,
+  ConcreteEnemyAnimationMovingCooldown,
   ConcreteEnemyAnimationAttacking,
+  ConcreteEnemyAnimationAttackingCooldown,
   ConcreteEnemyAnimationDying,
   ConcreteEnemyAnimationDecaying,
 } from './animations'
@@ -27,8 +29,10 @@ export default class ConcreteEnemy extends Enemy {
   // TODO: Extract to CreatureState objects
   // TODO: Adjust the feeling of enemy attack & animation
   protected attackSpeed = 0.45 // seconds
+  protected attackCooldownSpeed = 0.40 // seconds
 
-  protected maxAttackCooldown: number = (1000 * this.attackSpeed) / CONFIG.GAME_SPEED
+  protected maxAttackTime     : number = (1000 * this.attackSpeed        ) / CONFIG.GAME_SPEED
+  protected maxAttackCooldown : number = (1000 * this.attackCooldownSpeed) / CONFIG.GAME_SPEED
 
   constructor(
     x: number,
@@ -41,23 +45,28 @@ export default class ConcreteEnemy extends Enemy {
 
     this.pathfindingTimer = (9 * pathfindingTimerStart) % this.pathfindingInterval
 
+    // TODO: Move this function to Weapon
+    this.resetAttackTime()
+    this.resetAttackCooldown()
+
     this.animations = {
-      [CreatureState.Idling   ]: new ConcreteEnemyAnimationIdling(),
-      [CreatureState.Moving   ]: new ConcreteEnemyAnimationMoving(),
-      [CreatureState.Attacking]: new ConcreteEnemyAnimationAttacking(),
-      [CreatureState.Dying    ]: new ConcreteEnemyAnimationDying(),
-      [CreatureState.Decaying ]: new ConcreteEnemyAnimationDecaying(),
+      [CreatureState.Idling           ]: new ConcreteEnemyAnimationIdling(),
+      [CreatureState.Moving           ]: new ConcreteEnemyAnimationMoving(),
+      [CreatureState.MovingCooldown   ]: new ConcreteEnemyAnimationMovingCooldown(),
+      [CreatureState.Attacking        ]: new ConcreteEnemyAnimationAttacking(),
+      [CreatureState.AttackingCooldown]: new ConcreteEnemyAnimationAttackingCooldown(),
+      [CreatureState.Dying            ]: new ConcreteEnemyAnimationDying(),
+      [CreatureState.Decaying         ]: new ConcreteEnemyAnimationDecaying(),
     }
   }
 
   // TODO: See what more can be moved to `Enemy.update()`
   public update(player: Player): void {
-
     if (this.state >= CreatureState.Dying) {
       super.update(player)
 
       if (Game.stateManager.getState() === GAME_STATES.PLAYING) {
-        this.advanceAnimation()
+        this.advanceAnimation(false)
       }
       return
     }
@@ -72,8 +81,12 @@ export default class ConcreteEnemy extends Enemy {
     this.stuck = this.checkIfStuck() // TODO: Extract to state
 
     if (
-      this.state !== CreatureState.Idling &&
-      this.state !== CreatureState.Attacking &&
+      this.state !== CreatureState.Idling            &&
+      this.state !== CreatureState.MovingCooldown    &&
+      this.state !== CreatureState.Attacking         &&
+      this.state !== CreatureState.AttackingCooldown &&
+      this.previousState !== CreatureState.AttackingCooldown &&
+      this.previousState !== CreatureState.MovingCooldown    &&
       this.checkIfMoving() === false
     ) {
       this.setState(CreatureState.Idling)
@@ -85,15 +98,35 @@ export default class ConcreteEnemy extends Enemy {
     )
 
     const targetIsInRange = this.targetInRange(player)
-    if (this.state !== CreatureState.Attacking && targetIsInRange) {
-      this.resetAttackCooldown()
+    if (
+      this.state !== CreatureState.Attacking         &&
+      this.state !== CreatureState.AttackingCooldown &&
+      targetIsInRange
+    ) {
+      this.resetAttackTime()
       this.setState(CreatureState.Attacking)
     }
 
-    if (this.state === CreatureState.Attacking) {
-      this.attack(player)
+    if (
+      this.state === CreatureState.AttackingCooldown &&
+      targetIsInRange === false
+    ) {
+      this.setState(CreatureState.Moving)
+    }
 
-      const attackInProgress = this.attackCooldown !== this.maxAttackCooldown
+    if (this.state === CreatureState.Attacking) {
+
+      if (this.attackTime <= 0 && this.attackCooldown <= 0) {
+        this.attack(player)
+        this.resetAttackTime()
+        this.resetAttackCooldown()
+        if (targetIsInRange) {
+          this.setState(CreatureState.AttackingCooldown)
+          return
+        }
+      }
+
+      const attackInProgress = this.attackTime !== this.maxAttackTime
 
       if (
         targetIsInRange  === false &&
@@ -122,6 +155,7 @@ export default class ConcreteEnemy extends Enemy {
         this.setState(CreatureState.Moving)
       }
     }
+
     this.checkForCollisionWithOtherEnemies(player) // Must come before move()
     this.checkForCollisionWithPlayer(player)       // Must come before move()
 
@@ -138,7 +172,9 @@ export default class ConcreteEnemy extends Enemy {
     super.update(player)
 
     if (Game.stateManager.getState() === GAME_STATES.PLAYING) {
-      this.advanceAnimation()
+      this.advanceAttackTimeAndCooldown() // Must come before `advanceAnimation()`
+
+      this.advanceAnimation(targetIsInRange)
     }
   }
 
@@ -167,9 +203,23 @@ export default class ConcreteEnemy extends Enemy {
   }
 
   // TODO: Extract to ConcreteEnemyAnimationLifecycle object (or something like that)
-  protected advanceAnimation(): void {
+  protected advanceAnimation(targetIsInRange: boolean): void {
     if (this.state === CreatureState.Attacking) {
+      const attackInProgress = this.attackTime !== this.maxAttackTime
+      if (attackInProgress) {
+        this.animations[this.state].advanceAnimation()
+      }
+    }
+    if (this.state === CreatureState.AttackingCooldown) {
       this.animations[this.state].advanceAnimation()
+      if (this.animations[this.state].animationFinished) {
+        if (targetIsInRange === true) {
+          this.setState(CreatureState.Attacking)
+        }
+        else {
+          this.setState(CreatureState.Moving)
+        }
+      }
     }
     else if (this.state === CreatureState.Moving) {
       this.animations[this.state].advanceAnimation()
@@ -263,6 +313,21 @@ export default class ConcreteEnemy extends Enemy {
     else if (this.y > y) {
       this.moving.up = true
       this.movingDirections.up = true
+    }
+  }
+
+  private advanceAttackTimeAndCooldown(): void {
+    if (this.state === CreatureState.Attacking && this.attackTime > 0 && this.attackCooldown === 0) {
+      this.attackTime -= GameTime.frameElapsedTime
+    }
+
+    // Bring down the AttackCooldown...
+    const attackNotInProgress = this.attackTime === this.maxAttackTime
+    if (attackNotInProgress && this.attackCooldown >= 0) {
+      this.attackCooldown -= GameTime.frameElapsedTime
+      if (this.attackCooldown < 0) {
+        this.attackCooldown = 0
+      }
     }
   }
 

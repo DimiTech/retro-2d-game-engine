@@ -377,8 +377,11 @@ export default abstract class Creature {
   }
 
   protected updateDirection(targetCreature: Creature): void {
-    if (this.state === CreatureState.Attacking) {
-      this.updateDirectionWhenAttacking(targetCreature)
+    if (this.state === CreatureState.Attacking         ||
+        this.state === CreatureState.AttackingCooldown ||
+        this.state === CreatureState.MovingCooldown
+    ) {
+      this.updateDirectionWhenNotMoving(targetCreature)
     }
     else {
       this.updateDirectionWhenMoving()
@@ -407,7 +410,7 @@ export default abstract class Creature {
     this.direction = Directions[directionString as keyof typeof Directions]
   }
 
-  private updateDirectionWhenAttacking(targetCreature: Creature): void {
+  private updateDirectionWhenNotMoving(targetCreature: Creature): void {
     const theta = angleBetweenPoints(targetCreature, this)
     this.direction = getDirectionBasedOnAngle(theta)
   }

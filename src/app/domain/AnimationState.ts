@@ -14,9 +14,15 @@ export default abstract class AnimationState {
   protected numberOfSpritesInAnimation : number // integer
   protected animationSpritePosition    : number // integer
 
+  protected oneShotAnimation = false
+
   public animationFinished: boolean
   
   public advanceAnimation(): void {
+    if (this.animationFinished && this.oneShotAnimation) {
+      return // don't animate
+    }
+
     this.animationProgress = this.animationProgress + GameTime.elapsedTimeFactor
     const animationProgressPercentage = this.animationProgress / this.animationLength
     this.animationSpritePosition = Math.floor(animationProgressPercentage * this.numberOfSpritesInAnimation) % this.numberOfSpritesInAnimation
@@ -25,6 +31,7 @@ export default abstract class AnimationState {
   }
 
   public resetAnimation(): void {
+    this.animationFinished = false
     this.animationProgress = 0
     this.animationSpritePosition = 0
   }

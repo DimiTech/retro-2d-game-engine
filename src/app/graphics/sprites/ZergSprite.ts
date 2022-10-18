@@ -89,8 +89,10 @@ export default class ZergSprite extends CreatureSprite {
       y: 5
     }
     switch (creatureState) {
-      case CreatureState.Moving:
       case CreatureState.Idling:
+      case CreatureState.Moving:
+      case CreatureState.MovingCooldown:
+      case CreatureState.AttackingCooldown:
         return defaultSpriteOffset
       case CreatureState.Attacking:
         const ATTACK_SPRITES_ROW = 7
