@@ -1,0 +1,4 @@
+{
+  "entryFiles": ["src/main.ts"],
+  "projectFiles": ["src/**/*.ts"]
+}

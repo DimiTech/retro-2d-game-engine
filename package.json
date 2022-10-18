@@ -2,20 +2,21 @@
   "name": "retro-2d-game-engine",
   "version": "0.1.0",
   "description": "",
-  "license": "gpl-3.0",
+  "license": "ISC",
   "main": "main.js",
   "scripts": {
     "lint": "tslint ./src/**/*.ts",
+    "knip": "knip",
     "build": "webpack",
     "start": "npm run build -- -w --mode production",
     "test": "echo \"Error: no test specified\" && exit 1",
     "visualize-architecture": "arkit src/ -o arkit.svg"
   },
   "author": "Dušan Dimitrić <dusan_dimitric@yahoo.com",
-  "license": "ISC",
   "devDependencies": {
     "arkit": "^1.6.4",
     "eslint": "^8.23.1",
+    "knip": "^0.8.2",
     "source-map-support": "^0.5.21",
     "ts-loader": "^9.3.1",
     "webpack": "^5.74.0",

@@ -7,7 +7,7 @@ import GAME_STATES from "@app/infrastructure/game/game_states/GameStates"
 import Canvas, { context } from '@app/infrastructure/Canvas'
 
 import AttackEdgeCases from '@app/domain/AttackEdgeCases'
-export interface IWidget {
+interface IWidget {
   update(): void
   render(playerX: number, playerY: number): void
 }
@@ -38,7 +38,7 @@ export class DamageNumberFactory {
   }
 }
 
-export class DamageNumber {
+class DamageNumber {
   constructor(
     public x: number,
     public y: number,
