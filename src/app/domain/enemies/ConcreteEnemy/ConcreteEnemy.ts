@@ -334,7 +334,7 @@ export default class ConcreteEnemy extends Enemy {
   // TODO: Move to Creature since it's shared between enemies and player
   private debug_drawCollisionBox(player: Player) {
     context.strokeStyle = this.getHealthColor()
-    context.lineWidth = 0.2
+    context.lineWidth = 0.25
     context.beginPath()
       // Since this is just for debugging purposes, there is no need to
       // optimize/cache the vertex calculations.

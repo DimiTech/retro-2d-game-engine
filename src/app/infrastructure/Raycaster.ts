@@ -53,7 +53,7 @@ export default class Raycaster {
 
   public static drawRay(hitPoint: Point, color = '#4444FF'): void {
     context.strokeStyle = color
-    context.lineWidth = 0.2
+    context.lineWidth = 0.25
     context.beginPath()
       context.moveTo(Canvas.halfWidth, Canvas.halfHeight)
       context.lineTo(
