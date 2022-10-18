@@ -112,15 +112,19 @@ export default class ZergSprite extends CreatureSprite {
     const { x, y } = creature
     const { x: px, y: py } = playerCoordinates
 
-    const desinationWidth  = Math.floor(this.spriteProperties.dying.width  * (creature.collisionBox.width  / 20))
-    const desinationHeight = Math.floor(this.spriteProperties.dying.height * (creature.collisionBox.height / 20))
+    let desinationWidth  = Math.floor(this.spriteProperties.dying.width  * (creature.collisionBox.width  / 20))
+    let desinationHeight = Math.floor(this.spriteProperties.dying.height * (creature.collisionBox.height / 20))
+
+    // Destination dimensions must be multiples of 2, so Chrome can render the sprite properly
+    desinationWidth  = desinationWidth  - desinationWidth  % 2
+    desinationHeight = desinationHeight - desinationHeight % 2
 
     context.drawImage(
       this.spriteSheet,
       this.manuallyCalculatedSprites.dying[animationSpritePosition].sx,
       this.manuallyCalculatedSprites.dying[animationSpritePosition].sy,
-      this.spriteProperties.dying.width,  // Draw width
-      this.spriteProperties.dying.height, // Draw height
+      this.spriteProperties.dying.width,  // Sprite width
+      this.spriteProperties.dying.height, // Sprite height
       Canvas.center.x + (x - px - desinationWidth  / 2), // Canvas Desination X
       Canvas.center.y + (y - py - desinationHeight / 2), // Canvas Desination Y
       desinationWidth,

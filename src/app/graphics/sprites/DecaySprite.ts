@@ -48,8 +48,12 @@ export default class DecaySprite extends CreatureSprite {
     const { x, y } = creature
     const { x: px, y: py } = playerCoordinates
 
-    const desinationWidth  = Math.floor(this.spriteProperties.decay.width  * (creature.collisionBox.width  / 15))
-    const desinationHeight = Math.floor(this.spriteProperties.decay.height * (creature.collisionBox.height / 20))
+    let desinationWidth  = Math.floor(this.spriteProperties.decay.width  * (creature.collisionBox.width  / 15))
+    let desinationHeight = Math.floor(this.spriteProperties.decay.height * (creature.collisionBox.height / 20))
+
+    // Destination dimensions must be multiples of 2, so Chrome can render the sprite properly
+    desinationWidth  = desinationWidth - desinationWidth % 2
+    desinationHeight = desinationHeight - desinationHeight % 2
 
     const totalColumnsInSprite = 4
     const randomSxColumn = (creature.x + creature.y) % totalColumnsInSprite
@@ -59,8 +63,8 @@ export default class DecaySprite extends CreatureSprite {
       this.spriteSheet,
       randomSx,
       this.manuallyCalculatedSprites.decay[animationSpritePosition].sy,
-      this.spriteProperties.decay.width,  // Draw width
-      this.spriteProperties.decay.height, // Draw height
+      this.spriteProperties.decay.width,  // Sprite width
+      this.spriteProperties.decay.height, // Sprite height
       Canvas.center.x + (x - px - desinationWidth  / 2), // Canvas Desination X
       Canvas.center.y + (y - py - desinationHeight / 2), // Canvas Desination Y
       desinationWidth,
