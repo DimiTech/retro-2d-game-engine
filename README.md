@@ -11,7 +11,7 @@ Integers when calculating the data necessary for rendering.
 
 ## Live demo:
 
-https://dusandimitric.github.io/retro-2d-game-engine-demo/
+https://dimitech.io/retro-2d-game-engine-demo/
 
 ## Run it locally:
 
@@ -81,7 +81,7 @@ Overview of game states and possible transitions:
                      -------------
                    /               \
                   / ----------      Paused
-                 v v           \   /  
+                 v v           \   /
 Loading ---> Main Menu ---> Playing ---> Level Cleared ---> Victory
                              /  ^         /
                             v    \       /
