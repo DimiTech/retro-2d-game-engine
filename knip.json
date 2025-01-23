@@ -1,4 +1,5 @@
 {
   "entryFiles": ["src/main.ts"],
-  "projectFiles": ["src/**/*.ts"]
+  "projectFiles": ["src/**/*.ts"],
+  "ignore": ["package.json", ".eslintrc.json"]
 }

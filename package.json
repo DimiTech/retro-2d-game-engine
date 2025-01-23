@@ -17,7 +17,7 @@
     "@typescript-eslint/eslint-plugin": "^8.21.0",
     "arkit": "^1.6.4",
     "eslint": "^9.18.0",
-    "knip": "^0.8.2",
+    "knip": "^5.43.1",
     "source-map-support": "^0.5.21",
     "ts-loader": "^9.3.1",
     "webpack": "^5.74.0",
