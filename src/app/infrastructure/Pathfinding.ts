@@ -46,7 +46,7 @@ export function debug_drawPathNodes(path: PathNode[], player: Player, color: str
 
 export function drawNode(node: PathNode, player: Player, color: string): void {
   context.strokeStyle = color
-  context.lineWidth = 0.1
+  context.lineWidth = 0.4
   context.beginPath()
     // Since this is just for debugging purposes, there is no need to
     // optimize/cache the vertex calculations.

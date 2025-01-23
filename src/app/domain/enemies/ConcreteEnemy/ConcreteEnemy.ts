@@ -400,7 +400,7 @@ export default class ConcreteEnemy extends Enemy {
 
   private debug_drawRayFromPointToPoint(p1: Point, p2: Point, player: Player) {
     context.strokeStyle = '#FF00FF'
-    context.lineWidth = 0.2
+    context.lineWidth = 0.4
     context.beginPath()
       context.moveTo(Canvas.center.x + (p2.x - player.x), Canvas.center.y + (p2.y - player.y))
       context.lineTo(Canvas.center.x + (p1.x - player.x), Canvas.center.y + (p1.y - player.y))
